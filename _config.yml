@@ -1,1 +1,9 @@
 remote_theme: sapiosaturn/jekyll-theme-console
+
+header_pages: 
+  - index.md
+  - projects.md
+  - contact.md
+
+style: dark
+

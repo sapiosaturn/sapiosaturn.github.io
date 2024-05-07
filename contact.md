@@ -6,5 +6,6 @@ permalink: /contact
 
 # contact details
 
--placeholder-
+github: sapiosaturn
+mastodon: realvarunsingh@mastodon.social
 

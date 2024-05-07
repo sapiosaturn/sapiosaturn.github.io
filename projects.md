@@ -6,5 +6,10 @@ permalink: /projects/
 
 # projects
 
--placeholder-
+## currently:
+Currently learning Rust.
+
+## previously:
+
+(placeholder)
 

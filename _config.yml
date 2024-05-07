@@ -3,6 +3,7 @@ remote_theme: sapiosaturn/jekyll-theme-console
 header_pages: 
   - index.md
   - projects.md
+  - interesting_papers.md
   - contact.md
 
 style: dark

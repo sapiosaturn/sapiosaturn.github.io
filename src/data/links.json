@@ -1,0 +1,128 @@
+{
+	"https://x.com/stochasticchasm": {
+		"title": "@stochasticchasm on X",
+		"authors": [],
+		"year": null,
+		"omit": true,
+		"auto": "rule 2026-11-23 3d9f9602"
+	},
+	"https://gwern.net/sidenote": {
+		"title": "Sidenotes In Web Design",
+		"authors": ["Gwern"],
+		"year": 2020,
+		"auto": "page 2026-11-23 215ba268"
+	},
+	"https://arxiv.org/abs/1706.03762": {
+		"title": "Attention Is All You Need",
+		"authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar", "Jakob Uszkoreit", "Llion Jones", "Aidan N. Gomez", "Lukasz Kaiser", "Illia Polosukhin"],
+		"year": 2017,
+		"auto": "arxiv 2026-11-23 f5dde8ce"
+	},
+	"https://en.wikipedia.org/wiki/Small_caps": {
+		"title": "Small caps",
+		"authors": [],
+		"year": null,
+		"auto": "page 2026-11-23 6d0a7e94"
+	},
+	"https://github.com/karpathy/nanoGPT": {
+		"title": "karpathy/nanoGPT: The simplest, fastest repository for training/finetuning medium-sized GPTs.",
+		"authors": [],
+		"year": null,
+		"auto": "page 2026-11-23 511dbe4a"
+	},
+	"https://ekinakyurek.github.io/papers/ttt.pdf": {
+		"title": "The Surprising Effectiveness of Test-Time Training for Few-Shot Learning",
+		"authors": ["Ekin Akyürek", "Mehul Damani", "Adam Zweiger", "Linlu Qiu", "Han Guo", "Jyothish Pari", "Yoon Kim", "Jacob Andreas"],
+		"year": 2024
+	},
+	"https://gwern.net/design": {
+		"title": "Design Of This Website",
+		"authors": ["Gwern"],
+		"year": 2010,
+		"auto": "page 2026-11-23 84ee6549"
+	},
+	"https://arxiv.org/abs/2501.16975": {
+		"title": "Over-Tokenized Transformer: Vocabulary is Generally Worth Scaling",
+		"authors": ["Hongzhi Huang", "Defa Zhu", "Banggu Wu", "Yutao Zeng", "Ya Wang", "Qiyang Min", "Xun Zhou"],
+		"year": 2025,
+		"auto": "arxiv 2026-11-23 99ff1f6e"
+	},
+	"https://github.com/elder-plinius/L1B3RT4S/blob/main/1337.mkd": {
+		"title": "L1B3RT4S/1337.mkd at main · elder-plinius/L1B3RT4S",
+		"authors": [],
+		"year": null,
+		"auto": "page 2026-11-23 00c9973c"
+	},
+	"https://arxiv.org/abs/2406.11717": {
+		"title": "Refusal in Language Models Is Mediated by a Single Direction",
+		"authors": ["Andy Arditi", "Oscar Obeso", "Aaquib Syed", "Daniel Paleka", "Nina Panickssery", "Wes Gurnee", "Neel Nanda"],
+		"year": 2024,
+		"auto": "arxiv 2026-11-23 06b7e039"
+	},
+	"https://arxiv.org/abs/2404.19737": {
+		"title": "Better & Faster Large Language Models via Multi-token Prediction",
+		"authors": ["Fabian Gloeckle", "Badr Youbi Idrissi", "Baptiste Rozière", "David Lopez-Paz", "Gabriel Synnaeve"],
+		"year": 2024,
+		"auto": "arxiv 2026-11-23 903b14b9"
+	},
+	"https://arxiv.org/abs/2402.16837": {
+		"title": "Do Large Language Models Latently Perform Multi-Hop Reasoning?",
+		"authors": ["Sohee Yang", "Elena Gribovskaya", "Nora Kassner", "Mor Geva", "Sebastian Riedel"],
+		"year": 2024,
+		"auto": "arxiv 2026-11-23 b070df29"
+	},
+	"https://www.reuters.com/technology/artificial-intelligence/openai-rivals-seek-new-path-smarter-ai-current-methods-hit-limitations-2024-11-11/": {
+		"title": "OpenAI and others seek new path to smarter AI as current methods hit limitations",
+		"authors": ["{Reuters}"],
+		"year": 2024
+	},
+	"https://x.com/Grad62304977": {
+		"title": "@Grad62304977 on X",
+		"authors": [],
+		"year": null,
+		"omit": true,
+		"auto": "rule 2026-11-23 e5bc3cb0"
+	},
+	"https://arxiv.org/abs/2411.04282": {
+		"title": "Language Models are Hidden Reasoners: Unlocking Latent Reasoning Capabilities via Self-Rewarding",
+		"authors": ["Haolin Chen", "Yihao Feng", "Zuxin Liu", "Weiran Yao", "Akshara Prabhakar", "Shelby Heinecke", "Ricky Ho", "Phil Mui", "Silvio Savarese", "Caiming Xiong", "Huan Wang"],
+		"year": 2024,
+		"auto": "arxiv 2026-11-23 e5a8cb3b"
+	},
+	"https://openreview.net/forum?id=BGnm7Lo8oW": {
+		"title": "Towards Learning to Reason at Pre-Training Scale",
+		"authors": [],
+		"year": 2024,
+		"auto": "wayback 2026-11-23 13682e5e"
+	},
+	"https://arxiv.org/abs/2405.09818": {
+		"title": "Chameleon: Mixed-Modal Early-Fusion Foundation Models",
+		"authors": ["{Chameleon Team}"],
+		"year": 2024,
+		"auto": "arxiv 2026-11-23 abac4ca6"
+	},
+	"https://arxiv.org/abs/2407.21770": {
+		"title": "MoMa: Efficient Early-Fusion Pre-training with Mixture of Modality-Aware Experts",
+		"authors": ["Xi Victoria Lin", "Akshat Shrivastava", "Liang Luo", "Srinivasan Iyer", "Mike Lewis", "Gargi Ghosh", "Luke Zettlemoyer", "Armen Aghajanyan"],
+		"year": 2024,
+		"auto": "arxiv 2026-11-23 1ae3f45e"
+	},
+	"https://arxiv.org/abs/2411.04996": {
+		"title": "Mixture-of-Transformers: A Sparse and Scalable Architecture for Multi-Modal Foundation Models",
+		"authors": ["Weixin Liang", "Lili Yu", "Liang Luo", "Srinivasan Iyer", "Ning Dong", "Chunting Zhou", "Gargi Ghosh", "Mike Lewis", "Wen-tau Yih", "Luke Zettlemoyer", "Xi Victoria Lin"],
+		"year": 2024,
+		"auto": "arxiv 2026-11-23 9517489c"
+	},
+	"https://example.invalid/unfiled-note": {
+		"title": "",
+		"authors": [],
+		"year": null,
+		"auto": "failed 2026-11-23 6c07b3d5"
+	},
+	"https://openai.com/index/learning-to-reason-with-llms/": {
+		"title": "Learning to reason with LLMs",
+		"authors": ["{OpenAI}"],
+		"year": 2024,
+		"auto": "page 2026-11-23 34da3bcc"
+	}
+}

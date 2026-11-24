@@ -1,0 +1,23 @@
+---
+// The plate: a small pen drawing made in the reader's browser by
+// src/scripts/drift.js and styled by src/styles/home.css (which the page
+// using this must import). `lost` is the 404 version: nothing gets across.
+interface Props {
+	lost?: boolean;
+}
+const { lost = false } = Astro.props;
+const alt = lost
+	? 'A pen drawing made fresh on each visit: hairlines, each a random walk, run toward a chasm and stop. None crosses it.'
+	: 'A pen drawing made fresh on each visit: hairlines, each a random walk, run toward a chasm and stop; one line crosses it.';
+---
+
+<figure class:list={['plate', { 'plate-lost': lost }]}>
+	<div class="plate-art" role="img" aria-label={alt}></div>
+	<figcaption>
+		<span class="plate-seed">seed <button type="button" title="Draw again with a new seed" aria-label="Draw again with a new seed"></button></span>
+	</figcaption>
+</figure>
+
+<script>
+	import '../scripts/drift.js';
+</script>

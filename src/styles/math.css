@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Mathematics. Formulas are drawn as SVG when the site is built
+   (src/plugins/rehype-math.mjs: MathJax with the STIX Two glyphs), so this
+   file is all that is shipped for them: no script, no font.
+
+     <span class="math"><svg/> <span class="mb mb4"> </span> <svg/> <math/></span>     inline
+     <div class="eq eq-numbered" id="eq-softmax">                                      display
+       <div class="eq-body"><svg/><math/></div>
+       <a class="eq-no" href="#eq-softmax">(1)</a>
+     </div>
+
+   The drawing uses currentColor, so it follows the theme and the colour of
+   whatever it sits in (a heading, a note, a link). Its size is in em: the
+   x-height of the formula is the x-height of the serif around it.
+   ========================================================================== */
+
+/* 1. Inline ---------------------------------------------------------------- */
+
+.math {
+	/* Anchors the hidden MathML below to its own formula, so that in a table
+	   scrolled sideways on a phone it is clipped with the table instead of
+	   widening the page. */
+	position: relative;
+	white-space: nowrap;
+}
+.math > svg,
+.eq-body > svg {
+	/* Never scaled to fit: a formula keeps its size and, on display, scrolls. */
+	max-width: none;
+	overflow: visible;
+}
+/* On paper the outlines get a hair of extra weight (8/1000 em), which brings
+   STIX Two up to the colour of the serif; light on dark needs none. */
+.math > svg > g,
+.eq-body > svg > g {
+	stroke-width: var(--math-ink, 0);
+}
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme='dark']) {
+		--math-ink: 8;
+	}
+}
+:root[data-theme='light'] {
+	--math-ink: 8;
+}
+@media print {
+	:root {
+		--math-ink: 8;
+	}
+}
+/* Punctuation or a suffix typed straight after a formula stays with it. */
+.nw {
+	white-space: nowrap;
+}
+/* Where an inline formula may wrap (after a relation or an operator) there
+   is a real space, re-spaced to the width mathematics uses: 2 to 6 eighteenths
+   of an em. The serif's own space is 0.233em wide. */
+.mb {
+	font-family: var(--serif);
+	font-style: normal;
+	font-weight: 400;
+	white-space: normal;
+}
+.mb1 {
+	word-spacing: -0.122em;
+}
+.mb2 {
+	word-spacing: -0.066em;
+}
+.mb3 {
+	word-spacing: -0.011em;
+}
+.mb4 {
+	word-spacing: 0.045em;
+}
+.mb5 {
+	word-spacing: 0.1em;
+}
+/* A formula a little taller than its line (an inline fraction, a stacked
+   exponent) carries its extent above and below the baseline as --a and --d.
+   The line has room for 1.15em above the baseline and 0.44em below (the serif's
+   ascent and descent plus half the leading at line-height 1.6); up to a quarter
+   of an em beyond that is absorbed on each side, so the lines of the paragraph
+   stay evenly spaced. */
+.math > svg[style*='--a'] {
+	margin-top: clamp(-0.25em, (var(--math-above, 1.15) - var(--a)) * 1em, 0em);
+	margin-bottom: clamp(-0.25em, (var(--math-below, 0.44) - var(--d)) * 1em, 0em);
+}
+
+/* The same formula as MathML, for screen readers and for the copy handler.
+   Present in the page, never drawn. Safari ignores `width` on <math> and
+   Firefox ignores `overflow` on it, so a formula wider than a phone would
+   widen the page: at 1px type it is a few pixels across in every browser,
+   pinned to the corner of its own formula. */
+.math > math,
+.eq-body > math {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	font-size: 1px;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+/* 2. Display ---------------------------------------------------------------
+   Centred in the column; the number, if any, sits at the right edge on the
+   baseline of a one-line equation and at mid-height of a taller one. */
+.eq {
+	display: grid;
+	grid-template-columns: 1fr minmax(0, auto) 1fr;
+	align-items: baseline;
+	margin: 1.45em 0 1.5em;
+	scroll-margin-top: 5rem;
+}
+.eq-body {
+	position: relative;
+	grid-column: 2;
+	/* A formula wider than the column scrolls inside its own box. The padding
+	   keeps tall glyphs and the fade clear of a formula that fits. */
+	overflow-x: auto;
+	overflow-y: hidden;
+	margin: -0.5em -1rem;
+	padding: 0.5em 1rem;
+	line-height: 1.2;
+	text-align: center;
+	white-space: nowrap;
+	scrollbar-width: thin;
+	scrollbar-color: var(--rule-2) transparent;
+	-webkit-mask-image: linear-gradient(to right, transparent 0, #000 1rem, #000 calc(100% - 1rem), transparent 100%);
+	mask-image: linear-gradient(to right, transparent 0, #000 1rem, #000 calc(100% - 1rem), transparent 100%);
+}
+/* Beside a number the fade ends short of it. */
+.eq-numbered .eq-body {
+	margin-right: -0.25rem;
+}
+.eq-body:focus-visible {
+	outline-offset: -1px;
+}
+.eq-no {
+	grid-column: 3;
+	justify-self: end;
+	padding-left: 1.5rem;
+	font-family: var(--mono);
+	font-size: 0.72rem;
+	font-variant-numeric: normal;
+	line-height: 1;
+	text-decoration: none;
+	white-space: nowrap;
+	color: var(--ink-3);
+	transition: color 0.12s;
+}
+.eq-no:hover,
+.eq:target .eq-no {
+	color: var(--accent);
+}
+/* A reference in running text: "(3)", in the text face with lining figures. */
+.eq-ref {
+	font-variant-numeric: lining-nums;
+	white-space: nowrap;
+}
+
+/* 3. Details ---------------------------------------------------------------- */
+
+/* \hl{…} inside a formula. */
+.math .hl,
+.eq .hl {
+	fill: var(--accent);
+	stroke: var(--accent);
+}
+/* Rules and frames of arrays, which MathJax draws as lines. */
+.math line[data-line],
+.eq line[data-line],
+.math rect[data-frame],
+.eq rect[data-frame] {
+	fill: none;
+	stroke-width: 70px;
+}
+.math .mjx-dashed,
+.eq .mjx-dashed {
+	stroke-dasharray: 140;
+}
+.math .mjx-dotted,
+.eq .mjx-dotted {
+	stroke-linecap: round;
+	stroke-dasharray: 0, 140;
+}
+/* TeX that failed to compile is shown as written, and the build prints a warning. */
+.math-error {
+	font-family: var(--mono);
+	font-size: 0.8em;
+	color: #d98f7f;
+	text-decoration: underline wavy;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.25em;
+}
+
+/* In the small mono labels (fourth-level headings, table heads) a formula
+   set at the label's size would be too small to read. */
+.prose :is(h4, th) .math {
+	font-size: 1.35em;
+}
+
+/* In a margin note the leading is tighter. */
+.sidenote .math,
+.footnotes .math {
+	--math-above: 1.09;
+	--math-below: 0.39;
+}
+
+@media print {
+	.eq {
+		break-inside: avoid;
+	}
+	.eq-body {
+		overflow: visible;
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+}

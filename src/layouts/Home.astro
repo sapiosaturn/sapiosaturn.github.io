@@ -1,0 +1,46 @@
+---
+// Home: a small generative plate, the owner's text from index.md (a greeting,
+// then the rest as running text), then the latest posts, one row each. The
+// full list is the archive at /blog/, reached from the header.
+import Base from './Base.astro';
+import Plate from '../components/Plate.astro';
+import PostList from '../components/PostList.astro';
+import { getPosts } from '../lib/posts.js';
+import { SITE } from '../lib/text.js';
+import '../styles/home.css';
+
+const { compiledContent } = Astro.props;
+
+// index.md opens with a greeting, set large; the rest follows at text size.
+// Where it is cut, in order of preference:
+//   1. at a <!-- more --> comment, if index.md has one;
+//   2. after its first block, if that block is a paragraph of a line or two;
+//   3. nowhere: no greeting, and the whole text runs at text size.
+// Either part may be empty; its block is then left out.
+const html: string = (await compiledContent()).trim();
+const marker = /<!--\s*more\s*-->/.exec(html);
+const first = /^<p[\s>][\s\S]*?<\/p>/.exec(html)?.[0] ?? '';
+const isShort = first.replace(/<[^>]+>/g, '').length <= 160;
+const cut = marker ? marker.index : isShort ? first.length : 0;
+const greeting = html.slice(0, cut).trim();
+const about = html.slice(cut).replace(/^<!--\s*more\s*-->/, '').trim();
+
+// The rows show the newest few; every post is in the archive.
+const LATEST = 3;
+const posts = getPosts();
+---
+
+<Base description={SITE.description}>
+	<div class="home">
+		<Plate />
+
+		{greeting && <div class="prose home-greeting" set:html={greeting} />}
+		{about && <div class="prose home-about" set:html={about} />}
+
+		{posts.length > 0 && (
+			<section class="home-posts" aria-label="Latest posts">
+				<PostList posts={posts.slice(0, LATEST)} rail />
+			</section>
+		)}
+	</div>
+</Base>

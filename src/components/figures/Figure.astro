@@ -1,0 +1,16 @@
+---
+// The house frame around anything that is not drawn by the kit: an <img>, a
+// <video>, hand-written SVG. Same spacing, numbering and caption as kit figures.
+//   <Figure caption="…" credit="Photo: …"><img src="…" alt="…" /></Figure>
+import { captionHTML, inline } from './lib/render.js';
+
+const { caption = '', credit = '', n, id, wide = false, tone } = Astro.props;
+const locals = Astro.locals as Record<string, any>;
+const no = n === false ? undefined : n ?? (locals.figureNo = (locals.figureNo ?? 0) + 1);
+const cap = captionHTML({ n: no, caption: inline(caption), credit: inline(credit) });
+---
+
+<figure class:list={['figure', { 'fig-wide': wide }]} id={id ?? (no ? `fig-${no}` : undefined)} data-tone={tone}>
+	<span class="plate"><slot /></span>
+	<Fragment set:html={cap} />
+</figure>

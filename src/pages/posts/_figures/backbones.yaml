@@ -1,0 +1,42 @@
+# Two ways to draw the same decoder stack (redrawn from backbones.png).
+# Coordinates are grid units, (0, 0) at the top left; see /figures/ for the syntax.
+type: diagram
+grid: [30, 22.4]
+row: [17.5, 14.5]
+nodes:
+  # Left: the layers are the backbone, the residuals loop around them.
+  - { id: lf2, at: [7.5, 3.6],  size: [8, 2.4], label: FFN }
+  - { id: la2, at: [7.5, 7.9],  size: [8, 2.4], label: Attention }
+  - { id: lf1, at: [7.5, 12.2], size: [8, 2.4], label: FFN }
+  - { id: la1, at: [7.5, 16.5], size: [8, 2.4], label: Attention }
+  # Right: the residual stream is the backbone, the layers read from it and write to it.
+  - { id: rf2, at: [24.5, 3.6],  size: [8, 2.4], label: FFN }
+  - { id: ra2, at: [24.5, 7.9],  size: [8, 2.4], label: Attention }
+  - { id: rf1, at: [24.5, 12.2], size: [8, 2.4], label: FFN }
+  - { id: ra1, at: [24.5, 16.5], size: [8, 2.4], label: Attention }
+edges:
+  # Left, main path through the layers
+  - { from: [7.5, 20.3], to: la1.b, weight: stream }
+  - { from: la1.t, to: lf1.b, weight: stream }
+  - { from: lf1.t, to: la2.b, weight: stream }
+  - { from: la2.t, to: lf2.b, weight: stream }
+  - { from: lf2.t, to: [7.5, 0.4], weight: stream }
+  # Left, skip connections: leave below a layer, rejoin above it
+  - { from: [7.5, 18.65], via: [[2, 18.65], [2, 14.75]], to: [7.5, 14.75] }
+  - { from: [7.5, 14.35], via: [[2, 14.35], [2, 10.45]], to: [7.5, 10.45] }
+  - { from: [7.5, 10.05], via: [[2, 10.05], [2, 6.15]],  to: [7.5, 6.15] }
+  - { from: [7.5, 5.75],  via: [[2, 5.75], [2, 1.85]],   to: [7.5, 1.85] }
+  # Right, the residual stream
+  - { from: [18.5, 20.3], to: [18.5, 0.4], weight: stream }
+  # Right, each layer reads from the stream (into its base) and writes back (from its top)
+  - { from: [18.5, 18.45], via: [[22.6, 18.45]], to: ra1.b, curve: true }
+  - { from: ra1.t, via: [[22.6, 14.6]], to: [18.5, 14.6], curve: true }
+  - { from: [18.5, 14.15], via: [[22.6, 14.15]], to: rf1.b, curve: true }
+  - { from: rf1.t, via: [[22.6, 10.3]], to: [18.5, 10.3], curve: true }
+  - { from: [18.5, 9.85], via: [[22.6, 9.85]], to: ra2.b, curve: true }
+  - { from: ra2.t, via: [[22.6, 6.0]], to: [18.5, 6.0], curve: true }
+  - { from: [18.5, 5.55], via: [[22.6, 5.55]], to: rf2.b, curve: true }
+  - { from: rf2.t, via: [[22.6, 1.7]], to: [18.5, 1.7], curve: true }
+labels:
+  - { at: [6.75, 21.9], text: Layered backbone view, kind: title }
+  - { at: [23.5, 21.9], text: Residual backbone view, kind: title }

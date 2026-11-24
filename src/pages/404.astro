@@ -1,0 +1,16 @@
+---
+// Not found. The one echo of the home page's plate: here no walk gets across.
+import Base from '../layouts/Base.astro';
+import Plate from '../components/Plate.astro';
+import '../styles/home.css';
+---
+
+<Base title="Not found" description="There is nothing at this address.">
+	<div class="home">
+		<Plate lost />
+		<div class="notfound">
+			<h1>404</h1>
+			<p>cd: no such file or directory. Try <a href="/">~</a> or <a href="/blog/">~/blog</a>.</p>
+		</div>
+	</div>
+</Base>

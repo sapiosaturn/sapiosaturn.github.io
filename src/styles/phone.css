@@ -1,0 +1,268 @@
+/* ==========================================================================
+   Narrow screens: two reader conveniences for pages with no margins.
+   Last import of site.css. Both rely on the Popover API and both vanish
+   without it, leaving the page exactly as the other sheets draw it.
+
+   1  A note opens in place, as a sheet at the foot of the screen, when its
+      reference is tapped. The script in Layout.astro turns the mirrored
+      sidenote into a popover for as long as it is open.
+   2  Below 64rem, on posts with a contents list, a one-line bar names the
+      section being read over a hairline of progress. It is the contents
+      rail's own <aside>, restyled: tapping it opens the rail as a popover.
+      The bar comes down when the reader scrolls up and leaves when they
+      read on; only its hairline stays, at the top edge of the screen.
+   ========================================================================== */
+
+.sidenote-x,
+.secbar {
+	display: none;
+}
+.vh {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* 1. Notes in place ---------------------------------------------------------- */
+
+/* Not in a media query: only the script opens a note, and only when there is
+   no margin. Text sits on the reading column, the sheet runs edge to edge. */
+.sidenote:popover-open {
+	display: block;
+	float: none;
+	position: fixed;
+	inset: auto 0 0;
+	width: auto;
+	height: auto;
+	max-height: 50vh;
+	max-height: min(50dvh, 24rem);
+	margin: 0;
+	--gutter: max(var(--pad), calc(50% - var(--col) / 2));
+	padding: 0 var(--gutter) calc(1.3rem + env(safe-area-inset-bottom, 0px));
+	border: 0;
+	border-top: 1px solid var(--rule-2);
+	outline: 0;
+	background: var(--bg-raise);
+	color: var(--ink);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	font-family: var(--serif);
+	font-size: 0.95rem;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1.55;
+	letter-spacing: normal;
+	text-align: left;
+	text-indent: 0;
+	text-transform: none;
+	white-space: normal;
+}
+.sidenote:popover-open::backdrop {
+	background: none;
+}
+/* "Note 3" and the close mark stay put while a long note scrolls under them.
+   The label is a band across the whole sheet, so nothing shows beside it, and
+   its lower edge fades out, so a scrolling line is not cut off sharp. */
+.sidenote:popover-open .sidenote-no {
+	display: block;
+	float: none;
+	position: sticky;
+	top: 0;
+	margin: 0 calc(0px - var(--gutter));
+	padding: 1rem var(--gutter) 0.45rem;
+	background: linear-gradient(var(--bg-raise) 80%, transparent);
+	font-family: var(--mono);
+	font-size: 0.6875rem;
+	font-variant-numeric: normal;
+	line-height: 1.5;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+.sidenote:popover-open .sidenote-no::before {
+	content: 'Note ';
+	color: var(--ink-3);
+}
+.sidenote:popover-open .sidenote-x {
+	display: block;
+	float: right;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	width: 2.75rem;
+	height: 2.75rem;
+	/* The cross ends on the edge of the column; the negative foot keeps the
+	   float out of the first line of the note. */
+	margin: 0 -1.1rem -0.5rem 0.5rem;
+	padding: 0;
+	border: 0;
+	background: none;
+	font: 1rem/2.75rem var(--mono);
+	color: var(--ink-3);
+	cursor: pointer;
+}
+.sidenote:popover-open .sidenote-x:hover {
+	color: var(--ink-strong);
+}
+.sidenote:popover-open .sidenote-p {
+	display: block;
+}
+.sidenote:popover-open .sidenote-p + .sidenote-p {
+	margin-top: 0.6em;
+}
+/* The reference of the open note is lit, as it is beside a pinned margin note. */
+.fn-ref:has(+ .sidenote:popover-open) a {
+	background: var(--select);
+	color: var(--ink-strong);
+}
+@media (prefers-reduced-motion: no-preference) {
+	/* The script nudges the page when the sheet would cover the reference. */
+	html:has(.sidenote:popover-open) {
+		scroll-behavior: smooth;
+	}
+	.sidenote:popover-open {
+		transition: translate 0.18s ease-out;
+	}
+	@starting-style {
+		.sidenote:popover-open {
+			translate: 0 100%;
+		}
+	}
+}
+
+/* 2. Section bar ------------------------------------------------------------- */
+
+@supports selector(:popover-open) {
+	@media (max-width: 63.99rem) {
+		/* Parked above the screen until the script sets .on (past the title
+		   block and scrolling up). It stays while the contents are open, and
+		   comes down for keyboard focus. */
+		.toc-side {
+			--bar: 2.5rem;
+			display: block;
+			position: fixed;
+			z-index: 5;
+			inset: 0 0 auto;
+			translate: 0 -100%;
+			transition: translate 0.2s;
+		}
+		.toc-side:is(.on, :has(:popover-open, :focus-visible)) {
+			translate: none;
+		}
+		/* Reading progress. It hangs just below the bar, so when the bar is
+		   parked it is the one thing left on screen: a hairline as long as
+		   the part of the post already read. */
+		.toc-side::after {
+			content: '';
+			position: absolute;
+			inset: 100% 0 auto;
+			height: 1px;
+			background: var(--ink-4);
+			transform-origin: 0 50%;
+			scale: var(--p, 0) 1;
+		}
+		.secbar {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			width: 100%;
+			height: var(--bar);
+			margin: 0;
+			padding: 0 max(var(--pad), calc(50% - var(--col) / 2));
+			border: 0;
+			border-radius: 0;
+			background: var(--bg);
+			/* The site's meta line: mono 0.72rem, no tracking, --ink-3. */
+			font: 0.72rem/2.5rem var(--mono);
+			text-align: left;
+			color: var(--ink-3);
+			cursor: pointer;
+		}
+		/* The track the progress rule runs on, only while the bar is down. */
+		.toc-side:is(.on, :has(:popover-open, :focus-visible)) .secbar {
+			box-shadow: 0 1px var(--rule);
+		}
+		.secbar span:last-child {
+			flex: 1;
+			min-width: 0;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		}
+		/* The same sign as the contents disclosure at the top of the post. */
+		.secbar::after {
+			content: '+';
+			font-size: 0.8rem;
+			color: var(--ink-3);
+		}
+		.toc-side:has(:popover-open) .secbar::after {
+			content: '−';
+		}
+		.secbar:focus-visible {
+			outline-offset: -3px;
+		}
+
+		/* The rail, opened under the bar. Its amber tick and the open
+		   sub-sections of the current section come from global.css. */
+		#toc:popover-open {
+			position: fixed;
+			inset: var(--bar) 0 auto;
+			width: auto;
+			height: auto;
+			max-height: calc(100vh - 6rem);
+			max-height: min(70dvh, 100dvh - 6rem);
+			margin: 0;
+			padding: 0.5rem max(var(--pad), calc(50% - var(--col) / 2)) 0.9rem;
+			border: 0;
+			border-bottom: 1px solid var(--rule-2);
+			background: var(--bg);
+			color: inherit;
+			overflow-y: auto;
+			overscroll-behavior: contain;
+			font-size: 0.92rem;
+			line-height: 1.4;
+		}
+		#toc:popover-open a {
+			padding-block: 0.45rem;
+			color: var(--ink-2);
+		}
+		#toc:popover-open a[aria-current] {
+			color: var(--ink-strong);
+		}
+		#toc::backdrop {
+			inset-block-start: var(--bar);
+			background: color-mix(in srgb, var(--bg) 62%, transparent);
+		}
+
+		/* A jump up the page brings the bar down with it: headings land
+		   clear of it, and a note's back-link puts the sentence that cited
+		   it a third of the way down the screen. */
+		.toc-side ~ .prose :is(h2, h3, h4) {
+			scroll-margin-top: 3.5rem;
+		}
+		.fn-ref a {
+			scroll-margin-top: 30vh;
+		}
+	}
+
+	/* With room for the rail, the popover attribute must mean nothing: undo
+	   what the browser's stylesheet gives [popover]. */
+	@media (min-width: 64rem) {
+		.toc-rail {
+			display: block;
+			inset-inline: auto;
+			bottom: auto;
+			width: auto;
+			height: auto;
+			margin: 0;
+			padding-inline: 0;
+			padding-bottom: 0;
+			border: 0;
+			background: none;
+			color: inherit;
+		}
+	}
+}

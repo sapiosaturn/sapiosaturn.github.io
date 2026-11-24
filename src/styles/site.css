@@ -1,0 +1,10 @@
+/* The site stylesheet: one file, one request, the same on every page.
+   Astro bundles these in this order, so a later file may override an earlier
+   one at equal specificity. The home page (and the 404) add home.css. */
+@import './global.css';
+@import './refs.css';
+@import './endmark.css';
+@import './code.css';
+@import './math.css';
+@import './figures.css';
+@import './phone.css';

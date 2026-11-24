@@ -1,0 +1,138 @@
+---
+// The HTML shell: head, header, footer. Every page goes through here.
+import '../styles/site.css';
+import { SITE } from '../lib/text.js';
+
+interface Props {
+	title?: string;
+	/** For the meta tags. Only the home page (the site's own), the archive and the 404 have one; posts have none. */
+	description?: string;
+	/** Posts: the ISO dates of publication and (when later) of the last revision. */
+	article?: { date?: string; updated?: string };
+	/** The page has footnotes, so mid-width layouts reserve the right margin. */
+	notes?: boolean;
+	noindex?: boolean;
+}
+
+const { title, description, article, notes = false, noindex = false } = Astro.props;
+const path = Astro.url.pathname;
+const isHome = path === '/';
+const pageTitle = title && !isHome ? `${title} · ${SITE.name}` : SITE.name;
+const canonical = Astro.site ? new URL(path, Astro.site).href : undefined;
+// The link-preview card (src/pages/og/[slug].png.js): a post has its own, every other page shows the site's.
+const post = /^\/posts\/([^/]+)\/?$/.exec(path)?.[1];
+const card = Astro.site ? new URL(`/og/${post ?? 'index'}.png`, Astro.site).href : undefined;
+const cardAlt = `${post && title ? title : SITE.name}, under a pen drawing of hairlines that run toward a chasm and stop; one line crosses it.`;
+
+// Breadcrumb in shell-path form. /posts/ has no index of its own, so that
+// segment points at the archive.
+const segments = path.split('/').filter(Boolean);
+const crumbs = segments.map((name, i) => ({
+	name,
+	href: name === 'posts' ? '/blog/' : '/' + segments.slice(0, i + 1).join('/') + '/',
+	current: i === segments.length - 1,
+}));
+const Wordmark = isHome ? 'h1' : 'p';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{pageTitle}</title>
+		{description && <meta name="description" content={description} />}
+		{noindex && <meta name="robots" content="noindex" />}
+		{canonical && <link rel="canonical" href={canonical} />}
+		<meta property="og:site_name" content={SITE.name} />
+		<meta property="og:title" content={title && !isHome ? title : SITE.name} />
+		{description && <meta property="og:description" content={description} />}
+		<meta property="og:type" content={article ? 'article' : 'website'} />
+		{canonical && <meta property="og:url" content={canonical} />}
+		{article?.date && <meta property="article:published_time" content={article.date} />}
+		{article?.updated && <meta property="article:modified_time" content={article.updated} />}
+		{card && <meta property="og:image" content={card} />}
+		{card && <meta property="og:image:type" content="image/png" />}
+		{card && <meta property="og:image:width" content="1200" />}
+		{card && <meta property="og:image:height" content="630" />}
+		{card && <meta property="og:image:alt" content={cardAlt} />}
+		<meta name="twitter:card" content={card ? 'summary_large_image' : 'summary'} />
+		<meta name="theme-color" content="#141312" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#f6f4ee" media="(prefers-color-scheme: light)" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+		<link rel="preload" href="/fonts/source-serif-4-regular.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fonts/ibm-plex-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+		<slot name="head" />
+		<meta name="generator" content={Astro.generator} />
+		<script is:inline>
+			// Theme: 'light' or 'dark' when the reader has chosen one, otherwise the system's.
+			function setTheme(t) {
+				var d = document.documentElement, on = t === 'light' || t === 'dark';
+				if (on) d.dataset.theme = t; else delete d.dataset.theme;
+				[].forEach.call(document.querySelectorAll('meta[name=theme-color]'), function (m, i) {
+					m.content = (on ? t === 'dark' : !i) ? '#141312' : '#f6f4ee';
+				});
+			}
+			try { setTheme(localStorage.getItem('theme')); } catch (e) {}
+		</script>
+	</head>
+	<body class:list={{ 'has-notes': notes }}>
+		<a class="skip" href="#main">Skip to content</a>
+		<header class="site-header frame">
+			<div class="bar">
+				<Wordmark class="wordmark"><a href="/" aria-label={`${SITE.name}, home`}>{SITE.name}</a></Wordmark>
+				<nav class="crumbs" aria-label="Breadcrumb">
+					{crumbs.length > 0 && (
+						<Fragment>
+							<a href="/">~</a>{crumbs.map((c) => (
+								<Fragment><span class="sep">/</span>{c.current ? <span aria-current="page">{c.name}</span> : <a href={c.href}>{c.name}</a>}</Fragment>
+							))}
+						</Fragment>
+					)}
+				</nav>
+				<nav class="site-nav" aria-label="Site">
+					<a href="/blog/" aria-current={path.startsWith('/blog') || path.startsWith('/posts') ? 'true' : undefined}>blog</a>
+					<a class="feed" href="/rss.xml">rss</a>
+					<a href="https://x.com/stochasticchasm" rel="me noopener">twitter/x</a>
+					<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme" title="Theme: auto, light, dark">
+						<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"></path></svg>
+					</button>
+				</nav>
+			</div>
+		</header>
+
+		<main id="main" class="frame">
+			<slot name="rail" />
+			<div class="column"><slot /></div>
+		</main>
+
+		<footer class="site-footer frame">
+			<div class="bar">
+				<span>{SITE.name}</span>
+				<nav aria-label="Footer">
+					<a href="/blog/">blog</a>
+					<a href="/rss.xml">rss</a>
+					<a href="https://x.com/stochasticchasm" rel="me noopener">twitter/x</a>
+					<a href="#main">top ↑</a>
+				</nav>
+			</div>
+		</footer>
+
+		<script is:inline>
+			// Three states, in a ring: auto (follow the system), light, dark.
+			(function () {
+				var b = document.getElementById('theme-toggle'), order = ['auto', 'light', 'dark'];
+				function label() { b.title = 'Theme: ' + (document.documentElement.dataset.theme || 'auto'); b.setAttribute('aria-label', b.title); }
+				b.addEventListener('click', function () {
+					var next = order[(order.indexOf(document.documentElement.dataset.theme || 'auto') + 1) % 3];
+					setTheme(next);
+					try { next === 'auto' ? localStorage.removeItem('theme') : localStorage.setItem('theme', next); } catch (e) {}
+					label();
+				});
+				label();
+			})();
+		</script>
+		<slot name="scripts" />
+	</body>
+</html>

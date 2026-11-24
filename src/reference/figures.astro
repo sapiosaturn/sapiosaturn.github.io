@@ -1,0 +1,145 @@
+---
+// /figures/: the specimen sheet and manual for the figure kit. A reference page: not in the nav,
+// and not built for production (see the referencePages integration in astro.config.mjs).
+// The component demos and their snippets are Markdown (src/components/figures/gallery.md),
+// so they go through exactly the path a post does. The last section is collected
+// from the posts themselves at build time, so it cannot fall out of date.
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import LineChart from '../components/figures/LineChart.astro';
+import { Content, getHeadings } from '../components/figures/gallery.md';
+import { collectFigures } from '../components/figures/lib/collect.js';
+import { isoDate } from '../lib/text.js';
+
+const posts = Object.values(import.meta.glob('../pages/posts/*.md', { eager: true })) as any[];
+const imageModules = import.meta.glob('../pages/posts/_figures/*.{png,jpg,jpeg,webp,gif}', { eager: true, import: 'default' }) as Record<string, any>;
+const images = Object.fromEntries(Object.entries(imageModules).map(([file, mod]) => [file.split('/').pop(), mod]));
+
+// Every figure block and every lone image in a post, in reading order,
+// numbered the way the post numbers them.
+const inPosts = posts
+	.sort((a, b) => String(b.frontmatter.post_date).localeCompare(String(a.frontmatter.post_date)))
+	.map((post) => ({
+		title: post.frontmatter.post_title ?? post.frontmatter.title,
+		url: post.url + '/',
+		date: isoDate(post.frontmatter.post_date),
+		found: collectFigures(post.rawContent(), 'src/pages/posts', images, post.url) as any[],
+	}))
+	.filter((post) => post.found.length);
+const total = inPosts.reduce((n, p) => n + p.found.length, 0);
+const drawn = inPosts.reduce((n, p) => n + p.found.filter((f: any) => f.html).length, 0);
+
+const palette = [
+	['ink', 'first series, and anything alone'],
+	['accent', 'second series, or the one to look at'],
+	['blue', 'third'],
+	['teal', 'fourth'],
+	['rose', 'fifth'],
+	['mute', 'baselines, controls, context'],
+];
+const furniture = [
+	['--fig-label', 'axis titles, keys'],
+	['--fig-text', 'tick labels'],
+	['--fig-axis', 'axis rule, ticks'],
+	['--fig-grid', 'gridlines'],
+];
+const steps = Array.from({ length: 64 }, (_, i) => i);
+
+// Contents, as on the other two reference pages: the Markdown part's headings, then the three written below.
+const headings = [
+	...getHeadings(),
+	{ depth: 2, slug: 'palette', text: 'Palette' },
+	{ depth: 3, slug: 'ramps', text: 'Ramps' },
+	{ depth: 2, slug: 'in-posts', text: 'Figures in posts' },
+];
+---
+
+<Layout frontmatter={{ title: 'Figures', noindex: true, figureCount: 1, contents: true }} headings={headings}>
+	<Content />
+
+	<h2 id="palette"><a class="h-anchor" href="#palette" aria-label="Link to this section"></a>Palette</h2>
+	<p>
+		Series colours are named, never given as hex values. Each name is a variable with one value per theme, measured with
+		<code>tools/figures/palette-check.mjs</code> for contrast against the page and for separation under the three common kinds
+		of colour blindness. The three hues are deliberately muted; the amber is the site’s own accent.
+	</p>
+	<ul class="fig-swatches">
+		{palette.map(([name, use]) => (
+			<li style={`--sw: var(--fig-${name})`}>
+				<i />
+				<b>{name}</b>
+				{use}
+			</li>
+		))}
+	</ul>
+	<ul class="fig-swatches">
+		{furniture.map(([token, use]) => (
+			<li class="line" style={`--sw: var(${token})`}>
+				<i />
+				<b>{token.slice(6)}</b>
+				{use}
+			</li>
+		))}
+	</ul>
+
+	<LineChart
+		n={false}
+		x={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+		series={[
+			{ y: [1.0, 1.9, 2.7, 3.2, 3.9, 4.3, 4.9, 5.2, 5.6], label: 'ink' },
+			{ y: [0.8, 1.5, 2.0, 2.6, 3.0, 3.5, 3.8, 4.2, 4.6], label: 'accent' },
+			{ y: [0.6, 1.1, 1.6, 1.9, 2.3, 2.6, 2.9, 3.2, 3.6], label: 'blue' },
+			{ y: [0.4, 0.8, 1.1, 1.3, 1.6, 1.8, 2.0, 2.3, 2.6], label: 'teal' },
+			{ y: [0.2, 0.4, 0.6, 0.7, 0.9, 1.0, 1.2, 1.4, 1.6], label: 'rose' },
+			{ y: [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6], label: 'mute', color: 'mute', dash: true },
+		]}
+		height={250}
+		alt="The six series colours as lines"
+		caption="The series colours in order, drawn with the LineChart component from this page’s own Astro source rather than from a Markdown block."
+	/>
+
+	<h3 id="ramps"><a class="h-anchor" href="#ramps" aria-label="Link to this section"></a>Ramps</h3>
+	<p>
+		Heatmaps and token strips take their fills from two ramps, mixed in OKLab between three stops so that equal steps in the
+		data look like equal steps on the page. The sequential ramp starts at the page ground; the diverging ramp passes through it.
+	</p>
+	<div class="fig-ramp">
+		<svg viewBox="0 0 64 1" preserveAspectRatio="none" role="img" aria-label="Sequential ramp">
+			{steps.map((i) => <rect class="fg-cell" x={i} y="0" width="1.05" height="1" style={`--t:${(i / 63).toFixed(3)}`} />)}
+		</svg>
+	</div>
+	<div class="fig-ramp-ends"><span>sequential: low</span><span>high</span></div>
+	<div class="fig-ramp">
+		<svg viewBox="0 0 64 1" preserveAspectRatio="none" role="img" aria-label="Diverging ramp">
+			{steps.map((i) => <rect class="fg-cell-div" x={i} y="0" width="1.05" height="1" style={`--t:${((i / 63) * 2 - 1).toFixed(3)}`} />)}
+		</svg>
+	</div>
+	<div class="fig-ramp-ends"><span>diverging: negative</span><span>zero</span><span>positive</span></div>
+
+	<h2 id="in-posts"><a class="h-anchor" href="#in-posts" aria-label="Link to this section"></a>Figures in posts</h2>
+	<p>
+		Every figure that appears in a post, read from the posts when the site is built: {total} in all, {drawn} drawn with the kit.
+		Under each redrawn figure is the image it replaced.
+	</p>
+	{inPosts.map((post) => (
+		<Fragment>
+			<p class="fig-from">from <a href={post.url}>{post.title}</a> · {post.date}</p>
+			{post.found.map((f: any) => f.html ? (
+				<Fragment>
+					<Fragment set:html={f.html} />
+					{f.original && (
+						<details class="fig-original">
+							<summary>original: {f.originalName}</summary>
+							<Image src={f.original} alt={`The original image, ${f.originalName}`} width={832} />
+						</details>
+					)}
+				</Fragment>
+			) : (
+				<figure class="figure">
+					<span class="plate">{f.image && <Image src={f.image} alt={f.alt} width={1248} />}</span>
+					{f.n && <figcaption><span class="label">Fig. {f.n}</span>{f.caption && <span class="fig-cap">{f.caption}</span>}{f.credit && <span class="fig-credit">{f.credit}</span>}</figcaption>}
+				</figure>
+			))}
+		</Fragment>
+	))}
+</Layout>

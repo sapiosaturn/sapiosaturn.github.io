@@ -1,0 +1,27 @@
+---
+// Archive: every post, newest first, grouped by year.
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import { getPosts } from '../lib/posts.js';
+
+const posts = getPosts();
+const years = [...new Set(posts.map((p) => p.date.slice(0, 4)))];
+const span = years.length > 1 ? `${years.at(-1)}–${years[0]}` : years[0];
+---
+
+<Base title="Blog" description="Every post on stochastic chasm, newest first.">
+	<header class="page-head">
+		<h1>Blog</h1>
+		<p class="meta">
+			<span>{posts.length} posts</span>
+			<span>{span}</span>
+		</p>
+	</header>
+
+	{years.map((year) => (
+		<section aria-labelledby={`y${year}`}>
+			<h2 class="label year" id={`y${year}`}>{year}</h2>
+			<PostList posts={posts.filter((p) => p.date.startsWith(year))} shortDates />
+		</section>
+	))}
+</Base>

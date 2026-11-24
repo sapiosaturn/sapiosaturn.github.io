@@ -1,0 +1,657 @@
+/* ==========================================================================
+   Figures: the house figure kit (src/components/figures) and the frame every
+   figure sits in, kit-drawn or plain image. Bundled last by site.css. Nothing
+   here changes the site palette: figure colours are new tokens that sit
+   beside the existing ones.
+   Sections: 1 tokens · 2 frame and caption · 3 svg type · 4 marks
+   5 ramps · 6 diagrams · 7 gallery page · 8 zoom · 9 print
+   ========================================================================== */
+
+/* 1. Tokens ---------------------------------------------------------------- */
+
+/* A restrained categorical palette: ink, the site's amber, and three muted
+   hues chosen to stay apart for colour-blind readers (tools/figures/
+   palette-check.mjs measures this). Use in this order; a sixth series is a
+   sign the chart wants small multiples instead. */
+:root {
+	--fig-ink: var(--ink);
+	--fig-accent: var(--accent);
+	--fig-blue: #4b97c6;
+	--fig-teal: #35bdb6;
+	--fig-rose: #cf6f78;
+	--fig-mute: var(--ink-3);
+
+	/* Chart furniture, all taken from the site's greys. */
+	--fig-text: var(--ink-3);
+	--fig-label: var(--ink-2);
+	--fig-grid: var(--rule);
+	--fig-axis: var(--ink-4);
+
+	/* Sequential ramp: page ground -> amber -> pale. Interpolated in OKLab. */
+	--fig-ramp-lo: #1e1c1a;
+	--fig-ramp-mid: #7d5c2c;
+	--fig-ramp-hi: #f6e2b8;
+	/* Diverging ramp: the same amber for positive, a blue for negative. */
+	--fig-ramp-neg: #8fc0ec;
+	--fig-ramp-neg-mid: #3f6b94;
+	/* Type on a ramp cell: ink below the middle of the ramp, page colour above. */
+	--fig-on-lo: var(--ink);
+	--fig-on-hi: var(--bg);
+}
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme='dark']) {
+		--fig-blue: #285588;
+		--fig-teal: #177a76;
+		--fig-rose: #8a3f4b;
+		--fig-ramp-lo: #ece8dd;
+		--fig-ramp-mid: #b97f31;
+		--fig-ramp-hi: #4a2a07;
+		--fig-ramp-neg: #173f63;
+		--fig-ramp-neg-mid: #6d9cc4;
+	}
+}
+:root[data-theme='light'] {
+	--fig-blue: #285588;
+	--fig-teal: #177a76;
+	--fig-rose: #8a3f4b;
+	--fig-ramp-lo: #ece8dd;
+	--fig-ramp-mid: #b97f31;
+	--fig-ramp-hi: #4a2a07;
+	--fig-ramp-neg: #173f63;
+	--fig-ramp-neg-mid: #6d9cc4;
+}
+
+/* 2. Frame and caption ----------------------------------------------------- */
+
+/* Every figure, kit-drawn or image: the same space around it, a mono
+   "Fig. n" label, the caption in the text face, the source line in mono. */
+.prose figure {
+	margin: 2.2rem 0;
+}
+.prose figure.figure {
+	margin: 2.5rem 0 2.6rem;
+}
+.prose figure > figcaption {
+	margin-top: 0.9rem;
+	font-family: var(--serif);
+	font-size: 0.88rem;
+	line-height: 1.5;
+	font-variant-numeric: lining-nums;
+	color: var(--ink-2);
+}
+/* "Fig. n" is a .label like any other on the site: its size, tracking and
+   colour come from global.css. */
+.prose figure > figcaption .label {
+	margin-right: 0.75em;
+}
+.prose figure > figcaption em {
+	font-style: italic;
+}
+.fig-credit {
+	display: block;
+	margin-top: 0.35rem;
+	font-family: var(--mono);
+	font-size: 0.68rem;
+	line-height: 1.6;
+	letter-spacing: 0.01em;
+	color: var(--ink-3);
+}
+.fig-credit a {
+	color: inherit;
+}
+
+/* An image sits in a hairline frame. Its width and height come from the img
+   attributes, so lazy-loaded images reserve their space and nothing shifts
+   while reading. */
+.prose .plate {
+	display: block;
+	width: fit-content;
+	max-width: 100%;
+	margin-inline: auto;
+	overflow: hidden;
+	border: 1px solid var(--rule);
+	border-radius: 3px;
+}
+.prose .plate img {
+	display: block;
+}
+.prose p > img {
+	border: 1px solid var(--rule);
+	border-radius: 3px;
+	vertical-align: middle;
+}
+/* White-ground charts are inverted in the dark theme, on the page and in the
+   zoomed view alike: the build marks them data-tone="light"
+   (src/plugins/rehype-notebook.mjs). {keep} in the image title opts out. */
+.prose figure[data-tone='light'] img {
+	filter: var(--chart-filter);
+	mix-blend-mode: var(--chart-blend);
+	transition: filter 0.18s;
+}
+.prose figure[data-tone='light'] .plate {
+	position: relative;
+}
+/* Hovering a chart that zooms says why it looks the way it does. */
+.prose figure[data-tone='light'][data-zoom] .plate::after {
+	content: var(--chart-hint);
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	padding: 0.25rem 0.5rem;
+	border-radius: 2px;
+	background: var(--bg);
+	font: 0.625rem/1.3 var(--mono);
+	letter-spacing: 0.04em;
+	color: var(--ink-2);
+	opacity: 0;
+	transition: opacity 0.15s;
+	pointer-events: none;
+}
+.prose figure[data-tone='light'][data-zoom] .plate:hover::after {
+	opacity: 0.92;
+}
+
+/* Kit figures are drawn on the page itself: no box, no ground. */
+.fig-plate {
+	position: relative;
+}
+.fig-svg {
+	display: block;
+	width: 100%;
+	height: auto;
+	overflow: visible;
+	font-family: var(--mono);
+	font-size: 12px;
+	font-variant-numeric: lining-nums tabular-nums;
+	font-variant-ligatures: none;
+	-webkit-font-smoothing: var(--smoothing);
+}
+
+/* Each figure is drawn once per layout width; show the one that fits. */
+.fig-v-narrow,
+.fig-v-wide {
+	display: none;
+}
+@media (max-width: 33rem) {
+	.fig-v-col {
+		display: none;
+	}
+	.fig-v-narrow {
+		display: block;
+		max-width: 26rem;
+		margin-inline: auto;
+	}
+}
+/* Wide figures run across the column and the note margin. */
+@media (min-width: 78rem) {
+	.prose .fig-wide {
+		width: calc(var(--col) + var(--gap) + var(--margin));
+		clear: both;
+	}
+	.fig-wide .fig-v-col {
+		display: none;
+	}
+	.fig-wide .fig-v-wide {
+		display: block;
+	}
+	.fig-wide figcaption {
+		max-width: var(--col);
+	}
+	.prose .fig-wide .plate,
+	.prose .fig-wide .plate img {
+		width: 100%;
+		height: auto;
+	}
+}
+
+/* 3. Type inside a figure -------------------------------------------------- */
+
+.fig-svg text {
+	fill: var(--fig-text);
+}
+.fg-t {
+	font-size: 11.5px;
+}
+.fig-svg .fg-l,
+.fig-svg .fg-cat {
+	fill: var(--fig-label);
+}
+.fig-svg .fg-title {
+	fill: var(--ink);
+	font-size: 12.5px;
+	font-weight: 500;
+}
+.fig-svg .fg-val,
+.fig-svg .fg-pt {
+	fill: var(--fig-label);
+	font-size: 10.5px;
+}
+.fig-svg .fg-end {
+	fill: var(--c);
+}
+/* Prose inside a plot is set in the text face. */
+.fig-svg .fg-note,
+.fig-svg .fg-dtitle {
+	font-family: var(--serif);
+	font-style: italic;
+	font-size: 14.5px;
+	fill: var(--fig-label);
+}
+.fig-svg .fg-dtitle {
+	font-size: 16px;
+	fill: var(--ink);
+}
+/* A label that crosses marks gets a halo in the page colour. */
+.fg-halo {
+	paint-order: stroke;
+	stroke: var(--bg);
+	stroke-width: 4px;
+	stroke-linejoin: round;
+}
+
+/* 4. Marks ----------------------------------------------------------------- */
+
+.fg-c-ink { --c: var(--fig-ink); }
+.fg-c-accent { --c: var(--fig-accent); }
+.fg-c-blue { --c: var(--fig-blue); }
+.fg-c-teal { --c: var(--fig-teal); }
+.fg-c-rose { --c: var(--fig-rose); }
+.fg-c-mute { --c: var(--fig-mute); }
+
+.fg-grid,
+.fg-axis,
+.fg-tick {
+	stroke-width: 1px;
+	shape-rendering: crispEdges;
+}
+.fg-grid {
+	stroke: var(--fig-grid);
+}
+.fg-axis,
+.fg-tick {
+	stroke: var(--fig-axis);
+}
+.fg-ref {
+	stroke: var(--fig-label);
+	stroke-width: 1px;
+	stroke-dasharray: 4 3;
+	shape-rendering: crispEdges;
+}
+.fg-ref-halo {
+	stroke: var(--bg);
+	stroke-width: 3px;
+}
+.fg-leader {
+	stroke: var(--fig-axis);
+	stroke-width: 0.75px;
+	fill: none;
+}
+.fg-line {
+	fill: none;
+	stroke: var(--c);
+	stroke-width: 1.6px;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+.fg-strong {
+	stroke-width: 2.4px;
+}
+.fg-thin {
+	stroke-width: 1px;
+}
+.fg-dash {
+	stroke-dasharray: 5 3.5;
+	stroke-linecap: butt;
+}
+.fg-band {
+	fill: var(--c);
+	opacity: 0.15;
+}
+/* Points carry a hairline in the page colour so overlapping ones separate. */
+.fg-dot {
+	fill: var(--c);
+	stroke: var(--bg);
+	stroke-width: 0.75px;
+}
+.fg-open {
+	fill: var(--bg);
+	stroke: var(--c);
+	stroke-width: 1.4px;
+}
+.fg-bar {
+	fill: var(--c);
+}
+.fg-bar.fg-hot {
+	fill: var(--fig-accent);
+}
+
+/* 5. Ramps ----------------------------------------------------------------- */
+
+/* A cell carries its position on the ramp as --t (0..1, or -1..1 when
+   diverging); the fill is mixed here, per theme, from the ramp tokens. */
+.fg-cell rect,
+rect.fg-cell {
+	fill: var(--fig-accent);
+	fill-opacity: var(--t);
+}
+.fg-cell-div rect,
+rect.fg-cell-div {
+	fill: var(--fig-accent);
+	fill-opacity: max(var(--t), calc(var(--t) * -1));
+}
+@supports (color: color-mix(in oklab, red, blue)) {
+	.fg-cell rect,
+	rect.fg-cell {
+		fill-opacity: 1;
+		fill: color-mix(
+			in oklab,
+			color-mix(in oklab, var(--fig-ramp-lo), var(--fig-ramp-mid) clamp(0%, calc(var(--t) * 200%), 100%)),
+			var(--fig-ramp-hi) clamp(0%, calc(var(--t) * 200% - 100%), 100%)
+		);
+	}
+	.fg-cell-div rect,
+	rect.fg-cell-div {
+		--a: max(var(--t), calc(var(--t) * -1));
+		--pos: clamp(0, calc(var(--t) * 1000), 1);
+		--end: color-mix(in oklab, var(--fig-ramp-neg), var(--fig-ramp-hi) calc(var(--pos) * 100%));
+		--mid: color-mix(in oklab, var(--fig-ramp-neg-mid), var(--fig-ramp-mid) calc(var(--pos) * 100%));
+		fill-opacity: 1;
+		fill: color-mix(
+			in oklab,
+			color-mix(in oklab, var(--fig-ramp-lo), var(--mid) clamp(0%, calc(var(--a) * 200%), 100%)),
+			var(--end) clamp(0%, calc(var(--a) * 200% - 100%), 100%)
+		);
+	}
+}
+.fg-cell .fg-hot,
+.fg-cell-div .fg-hot {
+	stroke: var(--fig-accent);
+	stroke-width: 1.5px;
+}
+/* Numbers and tokens printed on cells. */
+.fig-svg .fg-num text {
+	fill: var(--fig-on-lo);
+	dominant-baseline: central;
+}
+.fig-svg .fg-num .fg-on-hi {
+	fill: var(--fig-on-hi);
+}
+.fig-svg .fg-tokt {
+	font-size: 13px;
+}
+.fig-svg .fg-tokt .fg-sm {
+	font-size: 10.5px;
+}
+.fig-svg .fg-tok {
+	fill: var(--ink);
+	font-size: 13px;
+}
+.fig-svg .fg-tok-hot {
+	fill: var(--fig-accent);
+}
+
+/* 6. Diagrams -------------------------------------------------------------- */
+
+.fg-edge {
+	--e: var(--ink-2);
+	fill: none;
+	stroke: var(--e);
+	stroke-width: 1.4px;
+	stroke-linejoin: round;
+}
+.fg-w-stream {
+	--e: var(--ink-strong);
+	stroke-width: 2.25px;
+}
+.fg-w-light {
+	--e: var(--ink-4);
+	stroke-width: 1px;
+}
+.fg-edge.fg-tone-accent {
+	--e: var(--fig-accent);
+}
+.fg-edge.fg-tone-mute {
+	--e: var(--ink-4);
+}
+.fg-head {
+	fill: var(--e);
+	stroke: none;
+}
+.fg-node rect {
+	fill: var(--bg-raise);
+	stroke: var(--rule-2);
+	stroke-width: 1px;
+}
+.fg-node.fg-tone-accent rect {
+	stroke: var(--fig-accent);
+}
+.fg-node.fg-tone-mute rect {
+	stroke: var(--rule);
+	fill: none;
+}
+.fig-svg .fg-node-t,
+.fig-svg .fg-node-s {
+	fill: var(--ink);
+	font-size: 13px;
+	text-anchor: middle;
+	dominant-baseline: central;
+}
+.fig-svg .fg-node-s {
+	fill: var(--ink-3);
+	font-size: 10.5px;
+}
+.fig-svg .fg-tone-accent .fg-node-t {
+	fill: var(--fig-accent);
+}
+.fig-svg .fg-tone-mute .fg-node-t {
+	fill: var(--ink-3);
+}
+.fg-add circle {
+	fill: var(--bg);
+	stroke: var(--ink-2);
+	stroke-width: 1.25px;
+}
+.fg-add path {
+	stroke: var(--ink-2);
+	stroke-width: 1.25px;
+}
+
+/* 7. Gallery page (/figures/) ---------------------------------------------- */
+
+.fig-swatches {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(8.2rem, 1fr));
+	gap: 1.1rem 1rem;
+	margin: 1.6rem 0 2.2rem;
+	padding: 0;
+	list-style: none;
+	font-family: var(--mono);
+	font-size: 0.68rem;
+	line-height: 1.5;
+	color: var(--ink-3);
+}
+.prose ul.fig-swatches {
+	padding-left: 0;
+}
+.prose .fig-swatches li {
+	margin: 0;
+	padding: 0;
+}
+.prose .fig-swatches li::before,
+.prose .fig-swatches li::marker {
+	content: none;
+}
+.fig-swatches b {
+	display: block;
+	font-weight: 500;
+	color: var(--ink);
+}
+.fig-swatches i {
+	display: block;
+	height: 1.9rem;
+	margin-bottom: 0.45rem;
+	border-radius: 2px;
+	background: var(--sw);
+}
+.fig-swatches .line i {
+	height: 0;
+	margin: 0.95rem 0 1.4rem;
+	border-top: 2px solid var(--sw);
+	border-radius: 0;
+	background: none;
+}
+.fig-ramp {
+	display: flex;
+	height: 1.9rem;
+	margin: 1.2rem 0 0.4rem;
+	border-radius: 2px;
+	overflow: hidden;
+}
+.fig-ramp svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.fig-ramp-ends {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 1.8rem;
+	font-family: var(--mono);
+	font-size: 0.68rem;
+	color: var(--ink-3);
+}
+/* A meta line, as in the page head. */
+.fig-from {
+	margin: 2.6rem 0 -1.2rem;
+	font-family: var(--mono);
+	font-size: 0.72rem;
+	font-variant-numeric: normal;
+	color: var(--ink-3);
+}
+.fig-from a {
+	color: var(--ink-2);
+}
+/* Before and after, on the gallery only. */
+.fig-original {
+	margin-top: -1.2rem;
+}
+.fig-original summary {
+	width: fit-content;
+	font-family: var(--mono);
+	font-size: 0.68rem;
+	color: var(--ink-3);
+	cursor: pointer;
+}
+.fig-original img {
+	display: block;
+	max-width: min(100%, 26rem);
+	height: auto;
+	margin-top: 0.8rem;
+	border: 1px solid var(--rule);
+	border-radius: 3px;
+}
+
+/* 8. Zoom ------------------------------------------------------------------ */
+
+/* src/scripts/zoom.js marks the figures worth enlarging (data-zoom) and, on a
+   click or Enter, copies one into a <dialog class="zoom prose">: the figure
+   alone on the page, as large as fits above its caption. No script, no zoom,
+   and nothing is missing. */
+[data-zoom] > :first-child {
+	cursor: zoom-in;
+}
+.zoom {
+	position: fixed;
+	inset: 0;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	max-height: none;
+	margin: 0;
+	/* zoom.js sizes the figure to fit inside this: keep the two in step. */
+	padding: 1.5rem 3rem;
+	border: 0;
+	overflow: auto;
+	background: var(--bg);
+	color: var(--ink);
+	cursor: zoom-out;
+	/* Opened with the pointer, the dialog itself holds the focus (zoom.js). */
+	outline: none;
+}
+.zoom[open] {
+	display: grid;
+	place-items: center;
+}
+/* The page behind must not scroll away while the figure is up. */
+html:has(.zoom[open]) {
+	overflow: hidden;
+}
+.prose.zoom figure.figure {
+	max-width: 100%;
+	margin: 0;
+}
+.zoom .plate,
+.zoom .plate img {
+	width: 100%;
+	height: auto;
+}
+.zoom .fig-svg {
+	display: block;
+}
+.zoom figcaption {
+	max-width: var(--col);
+	cursor: auto;
+}
+.zoom-close {
+	position: fixed;
+	top: 0.9rem;
+	right: 1.1rem;
+	appearance: none;
+	margin: 0;
+	padding: 0.4rem;
+	border: 0;
+	background: none;
+	font: 0.6875rem/1 var(--mono);
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: var(--ink-3);
+	cursor: pointer;
+}
+.zoom-close:hover {
+	color: var(--ink-strong);
+}
+@media (prefers-reduced-motion: no-preference) {
+	.zoom[open] {
+		animation: zoom-open 0.14s ease-out;
+	}
+}
+@keyframes zoom-open {
+	from {
+		opacity: 0;
+	}
+}
+
+/* 9. Print ----------------------------------------------------------------- */
+
+@media print {
+	:root {
+		--fig-blue: #285588;
+		--fig-teal: #177a76;
+		--fig-rose: #8a3f4b;
+		--fig-ramp-lo: #ece8dd;
+		--fig-ramp-mid: #b97f31;
+		--fig-ramp-hi: #4a2a07;
+		--fig-ramp-neg: #173f63;
+		--fig-ramp-neg-mid: #6d9cc4;
+	}
+	.prose .fig-wide {
+		width: auto;
+	}
+	.fig-wide .fig-v-wide {
+		display: none;
+	}
+	.fig-wide .fig-v-col {
+		display: block;
+	}
+}

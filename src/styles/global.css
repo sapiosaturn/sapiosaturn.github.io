@@ -1,0 +1,1305 @@
+/* ==========================================================================
+   stochastic chasm: nocturne
+   The base of the one site stylesheet (src/styles/site.css bundles this file
+   first, then refs, code, math and figures). Sections:
+   1 fonts · 2 tokens · 3 base · 4 frame · 5 header/footer · 6 prose
+   7 post chrome (title, toc, sidenotes) · 8 lists of posts · 9 small screens
+   10 print
+   ========================================================================== */
+
+/* 1. Fonts: self-hosted, latin subset, OFL -------------------------------- */
+
+/* Source Serif 4, subset from Adobe's own release so that real small caps
+   (smcp, c2sc) and old-style figures survive; the Google/fontsource builds
+   strip them. The italics have no small caps. */
+@font-face {
+	font-family: 'Source Serif 4';
+	src: url('/fonts/source-serif-4-regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Source Serif 4';
+	src: url('/fonts/source-serif-4-italic.woff2') format('woff2');
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Source Serif 4';
+	src: url('/fonts/source-serif-4-semibold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Source Serif 4';
+	src: url('/fonts/source-serif-4-semibold-italic.woff2') format('woff2');
+	font-weight: 600;
+	font-style: italic;
+	font-display: swap;
+}
+/* The display optical size, for the page title only (basic latin). */
+@font-face {
+	font-family: 'Source Serif 4 Display';
+	src: url('/fonts/source-serif-4-display-semibold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'IBM Plex Mono';
+	src: url('/fonts/ibm-plex-mono-400.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'IBM Plex Mono';
+	src: url('/fonts/ibm-plex-mono-500.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* 2. Tokens ---------------------------------------------------------------- */
+
+:root {
+	--serif: 'Source Serif 4', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+	--display: 'Source Serif 4 Display', 'Source Serif 4', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+	--mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+	/* Geometry. The reading column is sized for roughly 68 characters. */
+	--col: 39rem;
+	--rail: 13rem;
+	--margin: 15rem;
+	--gap: 3.5rem;
+	--pad: 1.5rem;
+
+	/* Dark is the native theme: a faintly warm near-black. Every grey sits on
+	   the same warm axis (hue about 35deg, low chroma); nothing leans blue. */
+	color-scheme: dark;
+	--bg: #141312;
+	--bg-raise: #1b1a18;
+	--ink: #d6d2c9;
+	--ink-strong: #f0ece3;
+	--ink-2: #a8a39a;
+	--ink-3: #837e75;
+	--ink-4: #5d5952;
+	--rule: #262422;
+	--rule-2: #3d3a36;
+	--underline: #6b665e;
+	--accent: #d0a465;
+	--select: rgba(208, 164, 101, 0.28);
+	--chart-filter: invert(0.92) hue-rotate(180deg);
+	--chart-blend: normal;
+	--chart-hint: 'inverted for the dark theme';
+	--smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme='dark']) {
+		color-scheme: light;
+		--bg: #f6f4ee;
+		--bg-raise: #edeae2;
+		--ink: #24231f;
+		--ink-strong: #11110f;
+		--ink-2: #57554f;
+		--ink-3: #75726a;
+		--ink-4: #a7a296;
+		--rule: #dedad0;
+		--rule-2: #c4bfb3;
+		--underline: #a39e92;
+		--accent: #96560f;
+		--select: rgba(150, 86, 15, 0.18);
+		--chart-filter: none;
+		--chart-blend: multiply;
+		--chart-hint: none;
+		--smoothing: auto;
+	}
+}
+:root[data-theme='light'] {
+	color-scheme: light;
+	--bg: #f6f4ee;
+	--bg-raise: #edeae2;
+	--ink: #24231f;
+	--ink-strong: #11110f;
+	--ink-2: #57554f;
+	--ink-3: #75726a;
+	--ink-4: #a7a296;
+	--rule: #dedad0;
+	--rule-2: #c4bfb3;
+	--underline: #a39e92;
+	--accent: #96560f;
+	--select: rgba(150, 86, 15, 0.18);
+	--chart-filter: none;
+	--chart-blend: multiply;
+	--chart-hint: none;
+	--smoothing: auto;
+}
+
+/* 3. Base ------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	background: var(--bg);
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	scroll-padding-top: 2rem;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	background: var(--bg);
+	color: var(--ink);
+	font-family: var(--serif);
+	font-size: 1.1875rem;
+	line-height: 1.6;
+	font-variant-numeric: oldstyle-nums proportional-nums;
+	font-kerning: normal;
+	/* Never fake a bold, an italic or small caps the fonts do not have. */
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: var(--smoothing);
+}
+
+::selection {
+	background: var(--select);
+	color: var(--ink-strong);
+}
+
+:focus-visible {
+	outline: 1px solid var(--accent);
+	outline-offset: 3px;
+	border-radius: 1px;
+}
+
+a {
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-color: var(--underline);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.19em;
+	transition: color 0.12s, text-decoration-color 0.12s;
+}
+a:hover {
+	color: var(--ink-strong);
+	text-decoration-color: var(--accent);
+}
+
+img,
+svg {
+	max-width: 100%;
+	height: auto;
+}
+
+/* The mono layer: site name, nav, dates, counts, labels, captions. */
+.mono,
+.label {
+	font-family: var(--mono);
+	font-variant-numeric: normal;
+	font-feature-settings: 'zero' 0;
+}
+.label {
+	font-size: 0.6875rem;
+	font-weight: 400;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: var(--ink-3);
+}
+
+.skip {
+	position: absolute;
+	left: -999px;
+	top: 0.5rem;
+	font: 0.75rem var(--mono);
+	background: var(--bg-raise);
+	padding: 0.4rem 0.7rem;
+}
+.skip:focus {
+	left: 0.5rem;
+	z-index: 10;
+}
+
+/* 4. Frame: every band of the page shares one grid ------------------------- */
+
+.frame {
+	display: grid;
+	grid-template-columns: [col] minmax(0, var(--col));
+	justify-content: center;
+	column-gap: var(--gap);
+	padding-inline: var(--pad);
+}
+.frame > * {
+	grid-column: col;
+	min-width: 0;
+}
+.rail {
+	display: none;
+}
+
+/* Mid-width: make room for margin notes only on pages that have some. */
+@media (min-width: 64rem) and (max-width: 77.99rem) {
+	.has-notes .frame {
+		grid-template-columns: [col] var(--col) [margin] var(--margin);
+	}
+}
+@media (min-width: 78rem) {
+	.frame {
+		grid-template-columns: [rail] var(--rail) [col] var(--col) [margin] var(--margin);
+	}
+	.rail {
+		display: block;
+		grid-column: rail;
+		grid-row: 1;
+	}
+	.rail + * {
+		grid-row: 1;
+	}
+}
+
+main {
+	flex: 1;
+}
+
+/* 5. Header and footer ----------------------------------------------------- */
+
+.site-header {
+	padding-top: 1.75rem;
+}
+.site-header .bar {
+	display: flex;
+	align-items: baseline;
+	gap: 1.5rem;
+	padding-bottom: 0.95rem;
+	border-bottom: 1px solid var(--rule);
+	font-family: var(--mono);
+	font-size: 0.74rem;
+	line-height: 1.5rem;
+	font-variant-numeric: normal;
+}
+.site-header a {
+	text-decoration: none;
+}
+.wordmark {
+	margin: 0;
+	font: inherit;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+	color: var(--ink);
+}
+.crumbs {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	color: var(--ink-3);
+}
+.crumbs a {
+	color: var(--ink-3);
+}
+.crumbs a:hover {
+	color: var(--ink-strong);
+}
+.crumbs .sep {
+	padding-inline: 0.08em;
+	opacity: 0.7;
+}
+.crumbs [aria-current] {
+	color: var(--ink-2);
+}
+.site-nav {
+	margin-left: auto;
+	display: flex;
+	align-items: baseline;
+	gap: 1.4rem;
+}
+.site-nav a {
+	color: var(--ink-3);
+}
+.site-nav a[aria-current] {
+	color: var(--ink-2);
+}
+.site-nav a:hover {
+	color: var(--ink-strong);
+}
+.theme-toggle {
+	appearance: none;
+	border: 0;
+	background: none;
+	padding: 0.35rem;
+	margin: -0.35rem;
+	color: var(--ink-3);
+	cursor: pointer;
+	align-self: center;
+	line-height: 0;
+}
+.theme-toggle:hover {
+	color: var(--ink-strong);
+}
+.theme-toggle svg {
+	display: block;
+	width: 0.82rem;
+	height: 0.82rem;
+}
+/* Half disc: follow the system. Ring: light. Disc: dark. */
+:root[data-theme='light'] .theme-toggle path {
+	display: none;
+}
+:root[data-theme='dark'] .theme-toggle circle {
+	fill: currentColor;
+}
+
+.site-footer {
+	margin-top: 6rem;
+	padding-bottom: 2.5rem;
+}
+.site-footer .bar {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 0.5rem 1.4rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--rule);
+	font-family: var(--mono);
+	font-size: 0.72rem;
+	font-variant-numeric: normal;
+	color: var(--ink-3);
+}
+.site-footer nav {
+	display: flex;
+	gap: 1.4rem;
+}
+.site-footer a {
+	text-decoration: none;
+	color: var(--ink-3);
+}
+.site-footer a:hover {
+	color: var(--ink-strong);
+}
+
+/* 6. Prose: every element markdown can emit -------------------------------- */
+
+.prose {
+	overflow-wrap: break-word;
+}
+.prose > :first-child {
+	margin-top: 0;
+}
+.prose > :last-child {
+	margin-bottom: 0;
+}
+
+/* Running text wraps the plain way (no text-wrap: pretty: browsers disagree
+   about what it means, and Safari's makes the text look narrower than its
+   column). */
+.prose p {
+	margin: 0 0 1.1em;
+}
+/* An opening quotation mark hangs in the margin. The build marks such
+   paragraphs (see rehype-notebook); the native hanging-punctuation is not
+   used, because only Safari has it and it hangs brackets as well. */
+.prose .hang-dq {
+	text-indent: -0.43em;
+}
+.prose .hang-sq {
+	text-indent: -0.23em;
+}
+
+/* Acronyms are set in real small caps with a little air (the build wraps
+   them; the italics have no small caps, so there they stay capitals). */
+.caps {
+	font-variant-caps: all-small-caps;
+	letter-spacing: 0.035em;
+}
+/* Not where the figures are lining (tables) or the face has no small caps. */
+:is(em, i, cite, dfn, th, td, kbd, .label, .mono) .caps {
+	font-variant-caps: normal;
+	letter-spacing: inherit;
+}
+/* Names that mix digits and letters (o1, 4o, v2) keep lining figures: beside
+   a letter an old-style 1 reads as an I, and an o as a zero. */
+.ln {
+	font-variant-numeric: lining-nums;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+	color: var(--ink-strong);
+	font-variant-numeric: lining-nums;
+	text-wrap: balance;
+	scroll-margin-top: 2rem;
+}
+.prose h2 {
+	margin: 3.4rem 0 1.15rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--rule);
+	font-size: 1.5rem;
+	font-weight: 600;
+	line-height: 1.22;
+	letter-spacing: -0.008em;
+}
+.prose h3 {
+	margin: 2.5rem 0 0.8rem;
+	font-size: 1.24rem;
+	font-weight: 400;
+	font-style: italic;
+	line-height: 1.3;
+}
+.prose h4 {
+	margin: 2rem 0 0.6rem;
+	font-family: var(--mono);
+	font-size: 0.72rem;
+	font-weight: 500;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: var(--ink-2);
+}
+.prose h2 + h3 {
+	margin-top: 1.6rem;
+}
+
+/* Heading self-links hang in the gutter, in the mono layer. On a post with a
+   contents list the link is the section number; elsewhere it is a # that
+   appears when the heading is hovered. Zero net width, so the heading text
+   does not move. */
+.numbered {
+	counter-reset: h2;
+}
+.numbered h2 {
+	counter-increment: h2;
+	counter-reset: h3;
+}
+.numbered h3 {
+	counter-increment: h3;
+}
+.h-anchor {
+	display: inline-block;
+	width: 2.75rem;
+	margin-left: -3.75rem;
+	margin-right: 1rem;
+	text-align: right;
+	font-family: var(--mono);
+	font-size: 0.7rem;
+	font-weight: 400;
+	font-style: normal;
+	line-height: 1;
+	letter-spacing: 0.02em;
+	font-variant-numeric: normal;
+	text-decoration: none;
+	color: var(--ink-3);
+	opacity: 0;
+	transition: opacity 0.12s, color 0.12s;
+}
+.h-anchor::before {
+	content: '#';
+}
+:is(h2, h3, h4):hover > .h-anchor,
+.h-anchor:focus-visible {
+	opacity: 1;
+}
+.h-anchor:hover {
+	color: var(--accent);
+}
+.numbered :is(h2, h3) > .h-anchor {
+	opacity: 1;
+	color: var(--ink-4);
+}
+.numbered :is(h2, h3):hover > .h-anchor {
+	color: var(--ink-2);
+}
+.numbered :is(h2, h3) > .h-anchor:hover {
+	color: var(--accent);
+}
+.numbered h2 > .h-anchor::before {
+	content: counter(h2);
+}
+.numbered h3 > .h-anchor::before {
+	content: counter(h2) '.' counter(h3);
+}
+
+.prose strong,
+.prose b {
+	font-weight: 600;
+	color: var(--ink-strong);
+}
+
+.prose ul,
+.prose ol {
+	margin: 0 0 1.1em;
+	padding-left: 1.5em;
+}
+.prose li {
+	margin: 0.3em 0;
+	padding-left: 0.2em;
+}
+.prose li > ul,
+.prose li > ol {
+	margin: 0.3em 0 0.4em;
+}
+.prose ul > li::marker {
+	content: '–\2002';
+	color: var(--ink-3);
+}
+.prose ol > li::marker {
+	font-family: var(--mono);
+	font-size: 0.76em;
+	font-variant-numeric: normal;
+	color: var(--ink-3);
+}
+.prose li > p {
+	margin-bottom: 0.5em;
+}
+.prose .contains-task-list {
+	list-style: none;
+	padding-left: 0.2em;
+}
+
+.prose blockquote {
+	margin: 1.7em 0;
+	padding: 0.1em 0 0.1em 1.35em;
+	border-left: 1px solid var(--rule-2);
+	color: var(--ink-2);
+	font-size: 0.94em;
+	line-height: 1.58;
+}
+.prose blockquote > :last-child {
+	margin-bottom: 0;
+}
+.prose blockquote blockquote {
+	font-size: 1em;
+}
+
+/* Section break: a hairline with a gap in it and a point in the gap (the
+   site's mark, laid flat). */
+.prose hr {
+	border: 0;
+	width: 8.5rem;
+	height: 1rem;
+	margin: 2.7rem auto;
+	background:
+		radial-gradient(circle, var(--ink-3) 0 2.1px, transparent 2.8px) center / 1rem 1rem no-repeat,
+		linear-gradient(var(--rule-2), var(--rule-2)) left center / calc(50% - 0.85rem) 1px no-repeat,
+		linear-gradient(var(--rule-2), var(--rule-2)) right center / calc(50% - 0.85rem) 1px no-repeat;
+}
+/* (The end of the essay has its own mark: endmark.css.) */
+
+/* Tables: rules above and below, none between columns. */
+.table-wrap {
+	margin: 1.9em 0;
+	overflow-x: auto;
+}
+.prose table {
+	/* Wraps within the column on wide screens; on a phone it may run wider and scroll. */
+	width: max-content;
+	min-width: 100%;
+	max-width: max(100%, 34rem);
+	border-collapse: collapse;
+	border-top: 1px solid var(--rule-2);
+	border-bottom: 1px solid var(--rule-2);
+	font-size: 0.875em;
+	line-height: 1.45;
+	font-variant-numeric: lining-nums tabular-nums;
+}
+.prose th,
+.prose td {
+	padding: 0.55em 1.4em 0.55em 0;
+	text-align: left;
+	vertical-align: baseline;
+}
+.prose th:last-child,
+.prose td:last-child {
+	padding-right: 0;
+}
+.prose th {
+	border-bottom: 1px solid var(--rule-2);
+	font-family: var(--mono);
+	font-size: 0.6875rem;
+	font-weight: 400;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--ink-3);
+	padding-block: 0.7em;
+}
+.prose tbody tr + tr td {
+	border-top: 1px solid var(--rule);
+}
+.prose [align='right'] {
+	text-align: right;
+}
+.prose [align='center'] {
+	text-align: center;
+}
+
+.prose details {
+	margin: 1.5em 0;
+}
+.prose summary {
+	cursor: pointer;
+}
+.prose mark {
+	background: var(--select);
+	color: inherit;
+	padding: 0.05em 0.15em;
+}
+.prose abbr[title] {
+	text-decoration: underline dotted var(--underline);
+	cursor: help;
+}
+.prose sub,
+.prose sup {
+	font-size: 0.72em;
+	line-height: 0;
+}
+
+/* Marks after links to a few well-known places (added at build time):
+   arXiv, Wikipedia, GitHub, X, and anything ending in .pdf. */
+.lm {
+	display: inline-block;
+	margin-left: 0.16em;
+	font-size: 0.6em;
+	font-style: normal;
+	font-weight: 400;
+	font-variant: normal;
+	line-height: 1;
+	letter-spacing: 0;
+	text-indent: 0;
+	vertical-align: 0.58em;
+	color: var(--ink-3);
+	transition: color 0.12s;
+}
+a:hover .lm {
+	color: var(--accent);
+}
+.lm-arxiv::before {
+	content: 'χ';
+	font-size: 1.2em;
+	font-style: italic;
+}
+.lm-wiki::before {
+	content: 'W';
+}
+.lm-pdf::before {
+	content: 'PDF';
+	font-family: var(--mono);
+	font-size: 0.86em;
+	letter-spacing: 0.04em;
+}
+.lm-gh,
+.lm-x {
+	width: 0.95em;
+	height: 0.95em;
+	background: currentColor;
+	-webkit-mask: var(--icon) center / contain no-repeat;
+	mask: var(--icon) center / contain no-repeat;
+}
+.lm-gh {
+	--icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E");
+}
+.lm-x {
+	--icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z'/%3E%3C/svg%3E");
+	width: 0.88em;
+	height: 0.88em;
+}
+
+/* Footnotes: references in text, endnotes below, sidenotes on wide screens. */
+.fn-ref {
+	font-family: var(--mono);
+	font-size: 0.62em;
+	font-variant-numeric: normal;
+	vertical-align: 0.62em;
+	line-height: 0;
+	margin-left: 0.08em;
+}
+.fn-ref a {
+	position: relative;
+	padding: 0.1em 0.22em;
+	margin: -0.1em -0.22em;
+	border-radius: 2px;
+	text-decoration: none;
+	color: var(--accent);
+}
+/* A larger target than the numeral itself. */
+.fn-ref a::after {
+	content: '';
+	position: absolute;
+	inset: -0.7em -0.3em;
+}
+.fn-ref .to-side {
+	display: none;
+}
+.sidenote {
+	display: none;
+}
+.footnotes {
+	margin-top: 4rem;
+	padding-top: 1.4rem;
+	border-top: 1px solid var(--rule);
+	font-size: 0.88em;
+	line-height: 1.55;
+	color: var(--ink-2);
+}
+.prose .footnotes > h2 {
+	display: block;
+	margin: 0 0 1rem;
+	padding: 0;
+	border: 0;
+	counter-increment: none;
+	font-family: var(--mono);
+	font-size: 0.6875rem;
+	font-weight: 400;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: var(--ink-3);
+}
+.prose .footnotes > h2::before {
+	content: none;
+}
+.footnotes ol {
+	margin-bottom: 0;
+}
+.footnotes li:target {
+	color: var(--ink);
+}
+/* The back-link arrow (U+21A9) is in the mono subset, so no browser has to go
+   looking for it and come back with an emoji. A U+FE0E after it would be the
+   textbook way to say so, but Safari then draws the pair from a system font. */
+.footnotes [data-footnote-backref] {
+	font-family: var(--mono);
+	font-variant-emoji: text;
+	text-decoration: none;
+	color: var(--ink-3);
+	margin-left: 0.3em;
+}
+
+@media (min-width: 64rem) {
+	.sidenote {
+		display: block;
+		float: right;
+		clear: right;
+		width: var(--margin);
+		margin: 0.28rem calc(-1 * (var(--margin) + var(--gap))) 1.1rem 0;
+		font-family: var(--serif);
+		font-size: 0.86rem;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 1.5;
+		color: var(--ink-2);
+		text-align: left;
+		text-indent: 0;
+	}
+	.sidenote-p {
+		display: block;
+	}
+	.sidenote-p + .sidenote-p {
+		margin-top: 0.5em;
+	}
+	.sidenote-no {
+		float: left;
+		margin-right: 0.6em;
+		font-family: var(--mono);
+		font-size: 0.68rem;
+		font-variant-numeric: normal;
+		line-height: 1.29rem;
+		color: var(--accent);
+	}
+	.footnotes[data-mirrored] {
+		display: none;
+	}
+	/* Reference and note light each other up on hover. Clicking the reference
+	   pins the highlight on its note (.lit, set by a few lines of script in
+	   Layout.astro; without script the link targets the note instead). */
+	.fn-ref:has(+ .sidenote) .to-end {
+		display: none;
+	}
+	.fn-ref:has(+ .sidenote) .to-side {
+		display: inline;
+	}
+	.sidenote {
+		scroll-margin-top: 30vh;
+		transition: color 0.15s;
+	}
+	.fn-ref:hover + .sidenote,
+	.sidenote:is(:hover, :target, .lit) {
+		color: var(--ink);
+	}
+	.fn-ref:hover a,
+	.fn-ref:has(+ .sidenote:is(:hover, :target, .lit)) a {
+		background: var(--select);
+		color: var(--ink-strong);
+	}
+	.fn-ref:hover + .sidenote .sidenote-no,
+	.sidenote:is(:hover, :target, .lit) .sidenote-no {
+		color: var(--ink-strong);
+	}
+}
+
+/* 7. Post chrome ----------------------------------------------------------- */
+
+.page-head {
+	margin: 4.5rem 0 3.2rem;
+}
+.page-head h1 {
+	margin: 0;
+	color: var(--ink-strong);
+	font-family: var(--display);
+	font-size: 2.8rem;
+	font-weight: 600;
+	line-height: 1.08;
+	letter-spacing: -0.012em;
+	font-variant-numeric: lining-nums;
+	text-wrap: balance;
+}
+.page-head .meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.2rem 0;
+	margin: 1.25rem 0 0;
+	font-family: var(--mono);
+	font-size: 0.72rem;
+	line-height: 1.5;
+	font-variant-numeric: normal;
+	color: var(--ink-3);
+}
+.meta > * + *::before {
+	content: '·';
+	padding-inline: 0.75em;
+	color: var(--ink-4);
+}
+
+/* Table of contents: a quiet sticky rail when there is room, a disclosure
+   otherwise. The rail lists sections only; the sub-sections of the one
+   being read open beneath it. */
+.toc ol {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.toc a {
+	display: block;
+	text-decoration: none;
+	color: var(--ink-2);
+}
+.toc a:hover {
+	color: var(--ink-strong);
+}
+.toc ol ol a {
+	padding-left: 1.1rem;
+	color: var(--ink-3);
+}
+
+.toc-side {
+	display: none;
+}
+@media (min-width: 78rem) {
+	.body {
+		position: relative;
+	}
+	.toc-side {
+		display: block;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		right: 100%;
+		width: var(--rail);
+		margin-right: var(--gap);
+	}
+}
+.toc-rail {
+	position: sticky;
+	top: 1.6rem;
+	max-height: calc(100vh - 3.2rem);
+	overflow-y: auto;
+	scrollbar-width: none;
+	padding-top: 0.4rem;
+	font-size: 0.8rem;
+	line-height: 1.36;
+	font-variant-numeric: lining-nums;
+}
+/* Start level with the first heading's text, below its rule. */
+.body:has(.prose > h2:first-child) .toc-rail {
+	padding-top: 1.9rem;
+	top: 0.1rem;
+}
+.toc-rail::-webkit-scrollbar {
+	display: none;
+}
+.toc-rail a {
+	padding: 0.27rem 0 0.27rem 0.9rem;
+	border-left: 1px solid transparent;
+	color: var(--ink-3);
+	transition: color 0.15s;
+}
+.toc-rail:hover a {
+	color: var(--ink-2);
+}
+.toc-rail a:hover {
+	color: var(--ink-strong);
+}
+.toc-rail li:has(> ol [aria-current]) > a {
+	color: var(--ink-2);
+}
+.toc-rail a[aria-current] {
+	color: var(--ink);
+	border-left-color: var(--accent);
+}
+.toc-rail ol ol {
+	display: none;
+	padding-bottom: 0.3rem;
+}
+.toc-rail li:has([aria-current]) > ol {
+	display: block;
+}
+.toc-rail ol ol a {
+	padding-left: 1.8rem;
+	font-size: 0.76rem;
+}
+
+.toc-inline {
+	margin: -1.2rem 0 2.6rem;
+	border-block: 1px solid var(--rule);
+	font-size: 0.92rem;
+	line-height: 1.4;
+	font-variant-numeric: lining-nums;
+}
+.toc-inline summary {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.8rem 0;
+	cursor: pointer;
+	list-style: none;
+}
+.toc-inline summary::-webkit-details-marker {
+	display: none;
+}
+.toc-inline summary::after {
+	content: '+';
+	font-family: var(--mono);
+	font-size: 0.8rem;
+	color: var(--ink-3);
+}
+.toc-inline[open] summary::after {
+	content: '−';
+}
+.toc-inline ol {
+	padding-bottom: 0.9rem;
+}
+.toc-inline a {
+	padding: 0.32rem 0;
+}
+@media (min-width: 78rem) {
+	.toc-inline {
+		display: none;
+	}
+}
+@media (max-width: 77.99rem) {
+	/* The disclosure's own rules stand in for the first section rule. */
+	.toc-inline + .body > .prose > h2:first-child {
+		margin-top: 0;
+		padding-top: 0;
+		border-top: 0;
+	}
+}
+
+/* 8. Lists of posts (home, archive): a row per post, a hairline under each.
+      The title carries the row; the date and the word count are in mono. ---- */
+
+.post-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.post-list li {
+	position: relative;
+	display: grid;
+	grid-template: 'date title words' / var(--date-col, 6.2rem) minmax(0, 1fr) auto;
+	column-gap: 1rem;
+	align-items: baseline;
+	padding: 0.95rem 0 1.05rem;
+	border-bottom: 1px solid var(--rule);
+}
+.post-list time,
+.post-list .words {
+	font-family: var(--mono);
+	font-size: 0.72rem;
+	font-variant-numeric: normal;
+	color: var(--ink-3);
+	white-space: nowrap;
+}
+.post-list time {
+	grid-area: date;
+}
+.post-list .words {
+	grid-area: words;
+	margin-left: 0.5rem;
+}
+.post-list a {
+	grid-area: title;
+	text-decoration-color: transparent;
+	color: var(--ink-strong);
+	font-size: 1.42rem;
+	line-height: 1.25;
+	letter-spacing: -0.005em;
+	font-variant-numeric: lining-nums;
+	text-wrap: balance;
+}
+.post-list a:hover {
+	text-decoration-color: var(--accent);
+}
+/* The whole row is the link's target, and under the pointer its date and
+   count come forward a step. */
+.post-list a::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+}
+.post-list li:hover :is(time, .words) {
+	color: var(--ink-2);
+}
+
+/* The home page's rows (PostList `rail`): where there is a left rail the date
+   hangs in it, on the title's baseline (an empty first track, the date pushed
+   out of it to the left); where there is none, the date and the count are a
+   line above the title, as every list is on a phone (section 9). */
+@media (min-width: 78rem) {
+	.in-rail li {
+		grid-template-columns: 0 minmax(0, 1fr) auto;
+		column-gap: 0;
+	}
+	.in-rail time {
+		justify-self: end;
+		margin-right: 2rem;
+	}
+	.in-rail .words {
+		margin-left: 1.5rem;
+	}
+}
+@media (max-width: 77.99rem) {
+	.in-rail li {
+		grid-template: 'date words' 'title title' / minmax(0, 1fr) auto;
+		row-gap: 0.2rem;
+	}
+}
+
+.year {
+	margin: 3rem 0 0;
+	padding-bottom: 0.7rem;
+	border-bottom: 1px solid var(--rule);
+}
+.page-head + section > .year {
+	margin-top: 0;
+}
+.by-year {
+	--date-col: 3.6rem;
+}
+
+.notfound {
+	margin-top: 4.5rem;
+	font-family: var(--mono);
+	font-size: 0.85rem;
+	font-variant-numeric: normal;
+	color: var(--ink-2);
+}
+.notfound h1 {
+	margin: 0 0 0.5rem;
+	font: inherit;
+	color: var(--ink-strong);
+}
+
+/* 9. Small screens --------------------------------------------------------- */
+
+/* Below this width there is no gutter for the heading links to hang in. */
+@media (max-width: 49.99rem) {
+	.h-anchor {
+		display: none;
+	}
+}
+
+@media (max-width: 40rem) {
+	:root {
+		--pad: 1.35rem;
+	}
+	body {
+		font-size: 1.0625rem;
+		line-height: 1.58;
+	}
+	.site-header {
+		padding-top: 1.1rem;
+	}
+	.site-header .bar {
+		gap: 1rem;
+		padding-bottom: 0.7rem;
+	}
+	.crumbs {
+		display: none;
+	}
+	.page-head {
+		margin: 2.8rem 0 2.4rem;
+	}
+	.page-head h1 {
+		font-size: 2.05rem;
+	}
+	.prose h2 {
+		margin-top: 2.8rem;
+		padding-top: 1.3rem;
+		font-size: 1.36rem;
+	}
+	.prose h3 {
+		font-size: 1.16rem;
+	}
+	.prose blockquote {
+		padding-left: 1rem;
+	}
+	.prose figure[data-bleed] {
+		margin-inline: calc(-1 * var(--pad));
+	}
+	.post-list li {
+		grid-template: 'date words' 'title title' / minmax(0, 1fr) auto;
+		row-gap: 0.2rem;
+	}
+	.post-list a {
+		font-size: 1.3rem;
+	}
+	.prose th,
+	.prose td {
+		padding-right: 0.9em;
+	}
+	.site-footer {
+		margin-top: 4rem;
+	}
+}
+/* The name and the header's four items (blog, rss, twitter/x, theme) need about
+   330px of the bar. Where the bar is narrower the items close up, and on the
+   narrowest phones the feed link leaves the header: it is still in the footer,
+   and a feed reader finds the feed through the <link> in the head. */
+@media (max-width: 24rem) {
+	.site-nav {
+		gap: 0.9rem;
+	}
+}
+@media (max-width: 22rem) {
+	.site-nav .feed {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		transition: none !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* 10. Print: black on white, chrome off, notes at the foot, links spelled out. */
+
+@media print {
+	@page {
+		margin: 2.2cm 2.4cm;
+	}
+	:root,
+	:root[data-theme] {
+		color-scheme: light;
+		--bg: #fff;
+		--bg-raise: #f4f4f2;
+		--ink: #111;
+		--ink-strong: #000;
+		--ink-2: #333;
+		--ink-3: #555;
+		--ink-4: #888;
+		--rule: #ccc;
+		--rule-2: #999;
+		--underline: #999;
+		--accent: #000;
+		--chart-filter: none;
+		--chart-blend: normal;
+		--chart-hint: none;
+		--smoothing: auto;
+	}
+	.site-header,
+	.site-footer,
+	.skip,
+	.rail,
+	.toc-side,
+	.toc-inline,
+	.theme-toggle,
+	.lm,
+	.sidenote,
+	.footnotes [data-footnote-backref] {
+		display: none !important;
+	}
+	html,
+	body {
+		background: #fff;
+	}
+	body {
+		display: block;
+		min-height: 0;
+		font-size: 10.5pt;
+		line-height: 1.5;
+	}
+	.frame {
+		display: block;
+		padding: 0;
+	}
+	.column {
+		max-width: 34rem;
+		margin-inline: auto;
+	}
+	.page-head {
+		margin: 0 0 2rem;
+	}
+	/* Margin notes return to the foot of the text. */
+	.fn-ref .to-end {
+		display: inline !important;
+	}
+	.fn-ref .to-side {
+		display: none !important;
+	}
+	.footnotes[data-mirrored] {
+		display: block;
+	}
+	.h-anchor {
+		display: inline-block;
+	}
+	/* Where a link goes, for a reader who cannot click it. */
+	.prose a[href^='http']::after {
+		content: ' <' attr(href) '>';
+		font-family: var(--mono);
+		font-size: 0.7em;
+		font-variant-numeric: normal;
+		letter-spacing: 0;
+		overflow-wrap: anywhere;
+		color: var(--ink-3);
+	}
+	h2,
+	h3,
+	h4 {
+		break-after: avoid;
+	}
+	figure,
+	blockquote,
+	pre,
+	table,
+	.code-block {
+		break-inside: avoid;
+	}
+	p,
+	li {
+		orphans: 3;
+		widows: 3;
+	}
+}

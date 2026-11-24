@@ -1,0 +1,184 @@
+/* ==========================================================================
+   Home page only. Imported by src/layouts/Home.astro (and by the 404 page,
+   for the plate). Every colour is a token from global.css. The rows of posts
+   are the site's .post-list (global.css, section 8).
+   Sections: 1 plate · 2 the owner's text · 3 latest posts · 4 wide screens
+   5 small screens
+   ========================================================================== */
+
+/* 1. Plate: drawn by src/scripts/drift.js ---------------------------------- */
+
+.plate {
+	margin: 2.5rem 0 0;
+}
+.plate-art {
+	height: 11.5rem;
+}
+.plate svg {
+	display: block;
+	overflow: visible;
+}
+/* --w is the weight the script gives a line: heavier near the surface. */
+.plate path {
+	fill: none;
+	stroke: var(--ink);
+	stroke-width: calc(var(--w, 1) * 1px);
+	stroke-linejoin: round;
+}
+.plate .x {
+	--w: 1.25;
+	stroke: var(--accent);
+	vector-effect: non-scaling-stroke; /* it is drawn in a sheared frame, which must not thicken it */
+}
+@media (min-resolution: 2dppx) {
+	.plate path {
+		stroke-width: calc(var(--w, 1) * 0.8px);
+	}
+}
+
+/* The pen: each walk is drawn from where it sets out, the crossing last.
+   Once it is drawn the plate is still: nothing on the page keeps moving.
+   No draw-in under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+	.plate-art.go path {
+		animation: plate-draw 0.8s var(--d) cubic-bezier(0.45, 0, 0.2, 1) backwards;
+	}
+	.plate-art.go .x {
+		animation: plate-draw 0.45s var(--d) cubic-bezier(0.45, 0, 0.2, 1) backwards;
+	}
+}
+/* The dash starts a hair before the path, or a speck of it shows while it waits. */
+@keyframes plate-draw {
+	from {
+		stroke-dasharray: 1 2;
+		stroke-dashoffset: 1.02;
+	}
+	to {
+		stroke-dasharray: 1 2;
+		stroke-dashoffset: 0;
+	}
+}
+/* The 404 page's plate: nothing gets across. */
+.plate-lost .x {
+	display: none;
+}
+.plate-lost + .notfound {
+	margin-top: 2.5rem;
+}
+
+.plate figcaption {
+	display: flex;
+	align-items: baseline;
+	gap: 0.9em;
+	margin-top: 0.7rem;
+	font-family: var(--mono);
+	font-size: 0.72rem;
+	line-height: 1.55;
+	font-variant-numeric: normal;
+	color: var(--ink-3);
+}
+.plate-seed {
+	margin-left: auto;
+	white-space: nowrap;
+}
+.plate button {
+	appearance: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-bottom: 1px dotted var(--underline);
+	background: none;
+	font: inherit;
+	color: var(--ink-2);
+	cursor: pointer;
+}
+.plate button:hover {
+	color: var(--ink-strong);
+	border-bottom-color: var(--accent);
+}
+/* Until the script has drawn, the caption has nothing to describe. */
+.plate:not(.on) figcaption {
+	visibility: hidden;
+}
+/* Without scripting there is no plate: the page starts at the greeting. */
+@media (scripting: none) {
+	.plate {
+		display: none;
+	}
+}
+
+/* 2. The owner's text: a greeting, then the rest at a size under the text's - */
+
+.home-greeting {
+	margin-top: 2.5rem;
+}
+.home-greeting p {
+	margin: 0;
+	font-size: 1.62rem;
+	line-height: 1.3;
+	letter-spacing: -0.008em;
+	color: var(--ink-strong);
+	text-wrap: balance;
+}
+.home-about {
+	margin-top: 1.25rem;
+	font-size: 1.0625rem;
+}
+.home-about p {
+	margin: 0 0 0.75em;
+}
+
+/* 3. Latest posts ----------------------------------------------------------- */
+
+.home-posts {
+	margin-top: 3rem;
+	border-top: 1px solid var(--rule);
+}
+/* Nothing follows the rows, so the last one is left open: the next rule down
+   is the footer's, and two rules with nothing between them read as an empty
+   row. */
+.home-posts .post-list li:last-child {
+	border-bottom: 0;
+}
+
+/* 4. Wide screens: the plate's caption sits in the right margin -------------- */
+
+@media (min-width: 78rem) {
+	.plate {
+		position: relative;
+	}
+	.plate figcaption {
+		position: absolute;
+		left: calc(100% + var(--gap));
+		bottom: 0;
+		display: block;
+		width: var(--margin);
+		margin: 0;
+	}
+}
+
+/* 5. Small screens ---------------------------------------------------------- */
+
+@media (max-width: 40rem) {
+	.plate {
+		margin-top: 1.6rem;
+	}
+	.plate-art {
+		height: 6.75rem;
+	}
+	.plate figcaption {
+		font-size: 0.68rem;
+	}
+	.home-greeting {
+		margin-top: 2rem;
+	}
+	.home-greeting p {
+		font-size: 1.4rem;
+	}
+	.home-about {
+		font-size: 1rem;
+	}
+	.home-posts {
+		margin-top: 2.5rem;
+	}
+}

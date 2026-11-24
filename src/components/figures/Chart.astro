@@ -1,0 +1,17 @@
+---
+// Any kit figure from an .astro (or, later, .mdx) page. The props are the same
+// keys a ```figure block takes; see /figures/ for the list.
+//   <Chart type="line" x={[1, 2, 3]} series={[{ y: [3, 1, 2], label: 'loss' }]} caption="…" />
+// Figures number themselves in page order; pass n to set the number, n={false} for none.
+// File paths (data, src) are relative to `dir`, by default the project root.
+import { renderFigure } from './lib/render.js';
+
+const { n, id, dir, ...spec } = Astro.props;
+const locals = Astro.locals as Record<string, any>;
+const no = n === false ? undefined : n ?? (locals.figureNo = (locals.figureNo ?? 0) + 1);
+// The ids inside the drawing: this component's own count on the page ("fgc-1"), kept apart from the figure number, which may be given or absent.
+const uid = `fgc-${(locals.figureUid = (locals.figureUid ?? 0) + 1)}`;
+const html = renderFigure(spec, { n: no, id: id ?? (no ? `fig-${no}` : undefined), dir, uid });
+---
+
+<Fragment set:html={html} />

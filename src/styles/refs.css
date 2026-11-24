@@ -1,0 +1,151 @@
+/* ==========================================================================
+   Page head, references, link refinements. Bundled after global.css by
+   site.css; wherever a rule here overrides one of global.css it also carries
+   one more class or element, so it never depends on that order.
+   Markup comes from Layout.astro and src/plugins/references.mjs.
+   1 page head · 2 references · 3 links · 4 print
+   ========================================================================== */
+
+/* 1. Page head: a meta line that wraps -------------------------------------- */
+/* Every item leads with its separator, and the line is pulled left by one
+   separator's width with that strip clipped away: whichever item starts a
+   line, on any screen, its dot is out of sight. */
+.page-head p.meta {
+	--sep: calc(1ch + 1.5em);
+	margin-left: calc(-1 * var(--sep));
+	clip-path: inset(0 0 0 var(--sep));
+	gap: 0.15rem 0;
+}
+.page-head .meta > * {
+	white-space: nowrap;
+}
+.page-head .meta > *::before {
+	content: '·';
+	display: inline-block;
+	width: var(--sep);
+	padding: 0;
+	text-align: center;
+	color: var(--ink-4);
+}
+/* The reference pages (/kitchen-sink/, /figures/, /typeset/; src/reference, not in a production build) are in no menu;
+   a second line of the same kind names the other two. */
+.page-head p.meta + p.kin {
+	margin-top: 0.4rem;
+}
+
+/* 2. References: the post's external links, once each, in order of first use.
+   Set like the endnotes, a step smaller and quieter than the text. */
+
+.references {
+	margin-top: 4rem;
+	padding-top: 1.4rem;
+	border-top: 1px solid var(--rule);
+	font-size: 0.88em;
+	line-height: 1.55;
+	color: var(--ink-2);
+}
+.prose .footnotes + .references {
+	margin-top: 2.8rem;
+}
+/* Where the endnotes are in the margin instead (global.css hides the list from
+   64rem up), the references follow the text, at the same distance as on a page
+   without notes. */
+@media screen and (min-width: 64rem) {
+	.prose .footnotes[data-mirrored] + .references {
+		margin-top: 4rem;
+	}
+}
+.prose .references > h2 {
+	display: block;
+	margin: 0 0 1rem;
+	padding: 0;
+	border: 0;
+	counter-increment: none;
+	font-family: var(--mono);
+	font-size: 0.6875rem;
+	font-weight: 400;
+	line-height: 1.6;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: var(--ink-3);
+}
+/* Numbered as the endnotes are, so the two lists read as one family. */
+.prose .references ol {
+	margin-bottom: 0;
+}
+.prose .references li {
+	margin: 0.5em 0;
+}
+/* The title is the entry and the link: full ink, and like the other lists of
+   links on the site (contents, archive) it is underlined only under the pointer. */
+.prose .ref-title,
+.prose .ref-title:visited {
+	color: var(--ink);
+	text-decoration-color: transparent;
+}
+.prose .ref-title:hover {
+	color: var(--ink-strong);
+	text-decoration-color: var(--accent);
+}
+.ref-host {
+	font-family: var(--mono);
+	font-size: 0.68rem;
+	font-variant-numeric: normal;
+	letter-spacing: 0.01em;
+	white-space: nowrap;
+	color: var(--ink-3);
+}
+
+/* 3. Links ----------------------------------------------------------------- */
+
+/* A link already followed keeps its colour; only its rule goes quiet. */
+.prose a:visited {
+	text-decoration-color: var(--rule-2);
+}
+.prose a:visited:hover {
+	text-decoration-color: var(--accent);
+}
+
+/* In-page links say which way they lead (the build compares positions). */
+.lm-up::before {
+	content: '↑';
+}
+.lm-down::before {
+	content: '↓';
+}
+.lm.lm-up,
+.lm.lm-down {
+	font-family: var(--mono);
+	font-size: 0.68em;
+	vertical-align: 0.45em;
+}
+
+/* 4. Print ----------------------------------------------------------------- */
+
+@media print {
+	/* In the text a link points at its entry in the list; the list carries the address. */
+	.prose a[data-ref][href]::after {
+		content: '[' attr(data-ref) ']';
+		display: inline-block;
+		margin-left: 0.25em;
+		font-size: 0.72em;
+		overflow-wrap: normal;
+	}
+	.references {
+		margin-top: 2.4rem;
+		font-size: 0.86em;
+	}
+	.references li {
+		break-inside: avoid;
+	}
+	.references a {
+		text-decoration: none;
+	}
+	.ref-host {
+		display: none;
+	}
+	.lm.lm-up,
+	.lm.lm-down {
+		display: inline-block !important;
+	}
+}

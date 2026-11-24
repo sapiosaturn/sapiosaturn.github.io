@@ -1,0 +1,110 @@
+---
+// Layout for every markdown page. A page with `post_date` is treated as a
+// post: it gets the date line, numbered sections and a table of contents.
+import Base from './Base.astro';
+import zoomSource from '../scripts/zoom.js?raw';
+import notesSource from '../scripts/notes.js?raw';
+import contentsSource from '../scripts/contents.js?raw';
+import { minify } from '../lib/minify.js';
+import { formatWords, isoDate, readingTime, wordCount } from '../lib/text.js';
+
+const { frontmatter, headings = [], rawContent } = Astro.props;
+const raw = typeof rawContent === 'function' ? rawContent() : '';
+
+const title = frontmatter.post_title || frontmatter.title;
+const date = isoDate(frontmatter.post_date);
+const isPost = Boolean(date);
+const words = wordCount(raw);
+// Optional frontmatter for the page head: `updated` is an ISO date;
+// `confidence` is a word or two ("likely"). A page has no summary of its own:
+// none under the title, none in the meta tags, the feed or the lists.
+const updated = isoDate(frontmatter.updated) > date ? isoDate(frontmatter.updated) : '';
+const confidence = frontmatter.confidence ? String(frontmatter.confidence) : '';
+// The reading time is the weakest item on the line: it makes way for the others.
+const showMinutes = !updated && !confidence;
+
+// Contents: second-level sections, each with its third-level children.
+const toc: any[] = [];
+for (const h of headings as any[]) {
+	if (h.slug === 'footnote-label') continue;
+	if (h.depth === 2) toc.push({ ...h, children: [] });
+	else if (h.depth === 3 && toc.length) toc.at(-1).children.push(h);
+}
+// Posts get a contents list; a page that is not a post asks for one with `contents: true` (the figure gallery).
+const hasToc = (isPost || frontmatter.contents === true) && toc.length >= 3;
+// The generated References list (the notebook plugin reports how many it wrote).
+if (hasToc && frontmatter.referenceCount) toc.push({ slug: 'references', text: 'References', children: [] });
+// Click-to-zoom, only on pages with a figure (the notebook plugin counts them; the gallery asks by hand).
+const zoom = frontmatter.figureCount ? minify(zoomSource) : '';
+const hasNotes = /^\[\^[^\]]+\]:/m.test(raw);
+// The three reference pages are in no menu; each names the other two in its head.
+const reference = [['/kitchen-sink/', 'every element'], ['/figures/', 'figures'], ['/typeset/', 'code and mathematics']];
+const here = Astro.url.pathname.replace(/\/?$/, '/');
+const isReference = reference.some(([href]) => href === here);
+---
+
+<Base title={title} article={isPost ? { date, updated: updated || undefined } : undefined} notes={hasNotes} noindex={Boolean(frontmatter.noindex)}>
+	<link slot="head" rel="preload" href="/fonts/source-serif-4-display-semibold.woff2" as="font" type="font/woff2" crossorigin />
+	<article>
+		<header class="page-head">
+			<h1>{title}</h1>
+			{isPost && (
+				<p class="meta">
+					<time datetime={date}>{date}</time>
+					{updated && <span>updated <time datetime={updated}>{updated}</time></span>}
+					{confidence && <span>confidence: {confidence}</span>}
+					<span>{formatWords(words)}</span>
+					{showMinutes && <span>{readingTime(words)}</span>}
+				</p>
+			)}
+			{isReference && (
+				<p class="meta kin">
+					<span>Reference pages</span>
+					{reference.map(([href, label]) => (href === here ? <span aria-current="page">{label}</span> : <a href={href}>{label}</a>))}
+				</p>
+			)}
+		</header>
+
+		{hasToc && (
+			<details class="toc toc-inline">
+				<summary><span class="label">Contents</span></summary>
+				<ol>
+					{toc.map((h) => (
+						<li>
+							<a href={`#${h.slug}`}>{h.text}</a>
+							{h.children.length > 0 && <ol>{h.children.map((c: any) => <li><a href={`#${c.slug}`}>{c.text}</a></li>)}</ol>}
+						</li>
+					))}
+				</ol>
+			</details>
+		)}
+
+		<div class="body">
+			{hasToc && (
+				<aside class="toc-side">
+					{/* Phones only (phone.css): a one-line bar naming the section being read; it opens the rail below as a popover. */}
+					<button class="secbar" type="button" popovertarget="toc"><span class="vh">Contents. Reading: </span><span></span></button>
+					<nav class="toc toc-rail" id="toc" popover aria-label="Contents">
+						<ol>
+							{toc.map((h) => (
+								<li>
+									<a href={`#${h.slug}`}>{h.text}</a>
+									{h.children.length > 0 && <ol>{h.children.map((c: any) => <li><a href={`#${c.slug}`}>{c.text}</a></li>)}</ol>}
+								</li>
+							))}
+						</ol>
+					</nav>
+				</aside>
+			)}
+			<div class:list={['prose', { post: isPost, numbered: hasToc }]}>
+				<slot />
+			</div>
+		</div>
+	</article>
+
+	{zoom && <script is:inline slot="scripts" set:html={zoom} />}
+
+	{/* Sources in src/scripts, minified at build time like the zoom script. */}
+	{hasNotes && <script is:inline slot="scripts" set:html={minify(notesSource)} />}
+	{hasToc && <script is:inline slot="scripts" set:html={minify(contentsSource)} />}
+</Base>

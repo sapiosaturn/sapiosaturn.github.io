@@ -1,0 +1,449 @@
+/* ==========================================================================
+   Code: inline code, keyboard keys, code blocks, terminal sessions, diffs.
+   The markup comes from src/plugins/shiki-house.mjs (tokens, line classes)
+   and src/plugins/rehype-code.mjs (the frame). One syntax theme serves both
+   colour schemes because every colour here is a custom property.
+   ========================================================================== */
+
+/* Italic for comments: the one extra font file (16 KB), fetched only by pages
+   whose code has a comment or a docstring in it. */
+@font-face {
+	font-family: 'IBM Plex Mono';
+	src: url('/fonts/ibm-plex-mono-400-italic.woff2') format('woff2');
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+
+/* 1. Tokens ---------------------------------------------------------------
+   Mostly ink and its greys. Three quiet hues, all at the lightness of the
+   body text so that nothing glows: sage for strings, clay for numbers and
+   constants, slate for a name where it is defined. Brick marks a removed
+   line and nothing else. */
+:root {
+	--code-fg: var(--ink);
+	--code-k: var(--ink-strong);
+	--code-p: var(--ink-2);
+	--code-c: var(--ink-3);
+	--code-s: #a8b18d;
+	--code-n: #d3a084;
+	--code-d: #9db3bf;
+	--code-add: #a8b18d;
+	--code-del: #d98f7f;
+	--code-band: rgba(214, 210, 201, 0.065);
+	--code-size: 0.84375rem; /* 13.5px against the 19px serif */
+	--code-pad: 1.25rem;
+}
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme='dark']) {
+		--code-s: #54632f;
+		--code-n: #94502f;
+		--code-d: #2f5a73;
+		--code-add: #54632f;
+		--code-del: #a23d2a;
+		--code-band: rgba(36, 35, 31, 0.055);
+	}
+}
+:root[data-theme='light'] {
+	--code-s: #54632f;
+	--code-n: #94502f;
+	--code-d: #2f5a73;
+	--code-add: #54632f;
+	--code-del: #a23d2a;
+	--code-band: rgba(36, 35, 31, 0.055);
+}
+
+/* 2. Inline ---------------------------------------------------------------- */
+
+.prose code,
+.prose kbd,
+.prose samp {
+	font-family: var(--mono);
+	font-size: 0.84em;
+	font-variant-numeric: normal;
+	font-variant-ligatures: none;
+	font-feature-settings: 'liga' 0, 'calt' 0;
+	font-style: normal;
+}
+/* A faint tint instead of a box. line-height 1 keeps the span from ever
+   making its line taller than the lines around it. */
+.prose :not(pre) > code {
+	padding: 0.1em 0.3em;
+	border-radius: 2px;
+	background: var(--code-band);
+	color: var(--ink-strong);
+	line-height: 1;
+	overflow-wrap: anywhere;
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+}
+/* In a table a name breaks only as a last resort: `anywhere` would let the
+   column shrink to one letter (a key column reading "captio / n"). */
+.prose :is(th, td) code {
+	overflow-wrap: break-word;
+}
+.prose kbd {
+	display: inline-block;
+	padding: 0.22em 0.42em 0.2em;
+	border: 1px solid var(--rule-2);
+	border-bottom-width: 2px;
+	border-radius: 3px;
+	background: var(--bg-raise);
+	font-size: 0.74em;
+	line-height: 1;
+	color: var(--ink-strong);
+	vertical-align: 0.06em;
+	white-space: nowrap;
+}
+/* In a link the underline carries on beneath the code and the colour is the link's. */
+.prose a > code {
+	color: inherit;
+}
+/* In headings, captions and table heads the code takes the size and colour
+   of its surroundings; only the face changes. */
+.prose :is(h1, h2, h3, h4) code {
+	padding: 0;
+	background: none;
+	font-size: 0.88em;
+	font-weight: 500;
+	color: inherit;
+}
+.prose h3 code {
+	font-weight: 400;
+}
+.prose h4 code,
+.prose :is(figcaption, th) code {
+	padding: 0;
+	background: none;
+	font-size: 1em;
+	color: var(--ink-strong);
+	text-transform: none;
+	letter-spacing: 0;
+}
+.sidenote code,
+.footnotes code {
+	color: var(--ink);
+}
+
+/* 3. The block ------------------------------------------------------------- */
+
+.code-block {
+	position: relative;
+	margin: 1.9em 0;
+	border: 1px solid var(--rule);
+	border-radius: 3px;
+	background: var(--bg-raise);
+}
+.code-block pre {
+	margin: 0;
+	padding: 1.05rem var(--code-pad) 1rem;
+	overflow-x: auto;
+	overflow-y: hidden;
+	color: var(--code-fg);
+	font-family: var(--mono);
+	font-size: var(--code-size);
+	line-height: 1.62;
+	font-variant-numeric: normal;
+	font-variant-ligatures: none;
+	font-feature-settings: 'liga' 0, 'calt' 0;
+	tab-size: 4;
+	white-space: pre;
+	-webkit-text-size-adjust: none;
+	text-size-adjust: none;
+	scrollbar-width: thin;
+	scrollbar-color: var(--rule-2) transparent;
+	/* A long line fades out at the edge of the frame instead of being cut.
+	   Text only ever reaches the padding while the block is scrolled, so a
+	   block that fits is not touched. */
+	-webkit-mask-image: linear-gradient(to right, transparent 0, #000 0.9rem, #000 calc(100% - 1.6rem), transparent calc(100% - 0.1rem));
+	mask-image: linear-gradient(to right, transparent 0, #000 0.9rem, #000 calc(100% - 1.6rem), transparent calc(100% - 0.1rem));
+}
+.code-block pre:focus-visible {
+	outline: none;
+}
+.code-block:has(pre:focus-visible) {
+	outline: 1px solid var(--accent);
+	outline-offset: 3px;
+}
+.code-block code {
+	display: block;
+	width: max-content;
+	min-width: 100%;
+	font-size: inherit;
+}
+/* Each line is a full-width strip, so a highlight reaches both edges of the
+   frame however far the block is scrolled. */
+.code-block .line {
+	display: inline-block;
+	box-sizing: border-box;
+	width: calc(100% + 2 * var(--code-pad));
+	margin-inline: calc(-1 * var(--code-pad));
+	padding-inline: var(--code-pad);
+}
+
+/* The legend on the top rule: an optional title on the left, the language on
+   the right, and (once the script has run) a copy button beside it. */
+.code-head {
+	position: absolute;
+	inset: 0 0.75rem auto;
+	/* Above the <pre>, which the mask makes a stacking context of its own. */
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	transform: translateY(-50%);
+	font-family: var(--mono);
+	font-size: 0.625rem;
+	line-height: 1;
+	font-variant-numeric: normal;
+	pointer-events: none;
+}
+/* Each label interrupts the rule: page colour above the line, the block's below. */
+.code-head > * {
+	padding: 0 0.5rem;
+	background: linear-gradient(var(--bg) 50%, var(--bg-raise) 50%);
+}
+.code-title {
+	overflow: hidden;
+	min-width: 0;
+	margin-right: auto;
+	font-size: 0.72rem;
+	line-height: 1.3;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--ink-2);
+}
+.code-lang {
+	font-size: 0.6875rem;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--ink-3);
+}
+.code-copy {
+	position: relative;
+	order: 1;
+	margin: 0;
+	border: 0;
+	font: inherit;
+	font-size: 0.6875rem;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	color: var(--ink-2);
+	cursor: pointer;
+	pointer-events: auto;
+	opacity: 0;
+	transition: opacity 0.12s, color 0.12s;
+}
+.code-lang {
+	order: 2;
+}
+/* A larger target than the word itself. */
+.code-copy::after {
+	content: '';
+	position: absolute;
+	inset: -0.7rem -0.1rem;
+}
+.code-block:hover .code-copy,
+.code-block:focus-within .code-copy {
+	opacity: 1;
+}
+.code-copy:hover,
+.code-copy:focus-visible {
+	color: var(--accent);
+}
+.code-copy:focus-visible {
+	outline-offset: 2px;
+}
+@media (hover: none) {
+	.code-copy {
+		opacity: 1;
+		color: var(--ink-3);
+	}
+}
+
+/* 4. Syntax ---------------------------------------------------------------- */
+
+.code-block .k {
+	color: var(--code-k);
+	font-weight: 500;
+}
+.code-block .d {
+	color: var(--code-d);
+}
+.code-block .s {
+	color: var(--code-s);
+}
+.code-block .n {
+	color: var(--code-n);
+}
+.code-block .p {
+	color: var(--code-p);
+}
+.code-block .c {
+	color: var(--code-c);
+	font-style: italic;
+}
+
+/* 5. Line numbers, highlights, diffs, terminal sessions --------------------- */
+
+.code-block[data-numbers] code {
+	counter-reset: line var(--start, 0);
+}
+.code-block[data-numbers] .line::before {
+	counter-increment: line;
+	content: counter(line);
+	display: inline-block;
+	width: calc(var(--digits, 2) * 1ch);
+	margin-right: 2ch;
+	text-align: right;
+	font-style: normal;
+	font-weight: 400;
+	color: var(--ink-4);
+	-webkit-user-select: none;
+	user-select: none;
+}
+.code-block .line.hl {
+	background: var(--code-band);
+}
+/* The +/- column is drawn here, not typed, so it is never selected or copied. */
+.code-block .mk {
+	display: inline-block;
+	width: 2ch;
+	-webkit-user-select: none;
+	user-select: none;
+}
+.code-block .mk::before {
+	content: attr(data-m);
+}
+.code-block .line.add {
+	background: color-mix(in srgb, var(--code-add) 11%, transparent);
+}
+.code-block .line.add .mk {
+	color: var(--code-add);
+}
+.code-block .line.del {
+	background: color-mix(in srgb, var(--code-del) 10%, transparent);
+	color: var(--ink-2);
+}
+.code-block .line.del :is(.k, .d, .s, .n, .p, .c) {
+	color: inherit;
+	font-weight: inherit;
+}
+.code-block .line.del .mk {
+	color: var(--code-del);
+}
+.code-block .line:is(.meta, .hunk) {
+	color: var(--code-c);
+	font-style: italic;
+}
+/* Terminal: what was typed is strong, what came back is quiet, and the
+   prompt belongs to neither. */
+.code-block .line.cmd {
+	color: var(--ink-strong);
+}
+.code-block .line.out {
+	color: var(--ink-2);
+}
+.code-block .line.note {
+	color: var(--code-c);
+	font-style: italic;
+}
+.code-block .pr {
+	-webkit-user-select: none;
+	user-select: none;
+	color: var(--ink-3);
+}
+.code-block .pr::before {
+	content: attr(data-p) ' ';
+}
+
+/* 6. Specimen pages (remark-example): the Markdown source of an example, set
+   as a quiet aside above what it produces. */
+.example {
+	margin: 1.9em 0 2.2em;
+}
+.example-source .code-block {
+	margin: 0 0 1.1rem;
+	border: 0;
+	border-left: 1px solid var(--rule-2);
+	border-radius: 0;
+	background: none;
+}
+.example-source .code-head {
+	display: none;
+}
+.example-source pre {
+	padding: 0.05rem 0 0.05rem 1rem;
+	font-size: 0.75rem;
+	line-height: 1.6;
+	color: var(--ink-2);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	-webkit-mask-image: none;
+	mask-image: none;
+}
+.example-source code {
+	width: auto;
+}
+.example-source .line {
+	display: inline;
+	margin: 0;
+	padding: 0;
+}
+.example-result > :first-child {
+	margin-top: 0;
+}
+.example-result > :last-child {
+	margin-bottom: 0;
+}
+
+/* 7. Wide and narrow screens, print ------------------------------------------ */
+
+/* `wide` on the fence lets a block use the note margin. It drops below any
+   sidenote that is still running beside the text above it. */
+@media (min-width: 78rem) {
+	.code-block[data-wide] {
+		clear: right;
+		margin-right: calc(-1 * (var(--margin) + var(--gap)));
+	}
+}
+@media (max-width: 40rem) {
+	:root {
+		--code-size: 0.78rem;
+	}
+	/* Full bleed: the frame keeps only its top and bottom rules. */
+	.prose > .code-block,
+	.prose > .example > * > .code-block {
+		--code-pad: var(--pad);
+		margin-inline: calc(-1 * var(--pad));
+		border-inline: 0;
+		border-radius: 0;
+	}
+	.prose > .code-block .code-head,
+	.prose > .example > * > .code-block .code-head {
+		inset-inline: calc(var(--pad) - 0.5rem);
+	}
+}
+@media print {
+	:root {
+		--code-s: #54632f;
+		--code-n: #94502f;
+		--code-d: #2f5a73;
+		--code-add: #54632f;
+		--code-del: #a23d2a;
+		--code-band: rgba(36, 35, 31, 0.055);
+	}
+	.code-block pre {
+		overflow: visible;
+		white-space: pre-wrap;
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+	.code-block code {
+		width: auto;
+	}
+	.code-copy {
+		display: none;
+	}
+}

@@ -1,0 +1,25 @@
+---
+// One row per post: date, title, word count. Used by the home page (the
+// latest few, `rail`) and by the archive (every post under its year,
+// `shortDates`). Styled in global.css, section 8.
+import { formatWords } from '../lib/text.js';
+
+interface Props {
+	posts: { url: string; title: string; date: string; words: number }[];
+	/** Inside a year group the year is already stated, so show month-day only. */
+	shortDates?: boolean;
+	/** On wide screens hang each date in the left rail instead of a column of its own. */
+	rail?: boolean;
+}
+const { posts, shortDates = false, rail = false } = Astro.props;
+---
+
+<ol class:list={['post-list', { 'by-year': shortDates, 'in-rail': rail }]}>
+	{posts.map((post) => (
+		<li>
+			<time datetime={post.date}>{shortDates ? post.date.slice(5) : post.date}</time>
+			<a href={post.url}>{post.title}</a>
+			<span class="words">{formatWords(post.words)}</span>
+		</li>
+	))}
+</ol>
